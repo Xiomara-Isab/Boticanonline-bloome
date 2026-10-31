@@ -1,0 +1,12 @@
+<%
+  String fOk = (String) session.getAttribute("flashOk");
+  String fErr = (String) session.getAttribute("flashErr");
+  session.removeAttribute("flashOk");
+  session.removeAttribute("flashErr");
+%>
+<% if (fOk != null) { %>
+  <div class="alert alert-success alert-dismissible fade show"><i class="bi bi-check-circle me-1"></i> <%= com.botica.util.Html.esc(fOk) %><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+<% } %>
+<% if (fErr != null) { %>
+  <div class="alert alert-danger alert-dismissible fade show"><i class="bi bi-exclamation-triangle me-1"></i> <%= com.botica.util.Html.esc(fErr) %><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+<% } %>

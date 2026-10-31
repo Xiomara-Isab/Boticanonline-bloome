@@ -1,0 +1,58 @@
+classDiagram
+direction LR
+class PanelController
+class AuthController
+class PedidoController
+class PedidoFacade {
+  +realizarPedido(idCliente, items) Pedido
+  +avanzarPedido(idPedido) Pedido
+  +registrarReclamo(idCliente, idPedido, desc)
+}
+class PedidoService { +avanzarEstado(idPedido) Pedido }
+class UsuarioService { +registrarCliente() +autenticar() +crearPersonal() +cambiarRol() }
+class ProductoService { +crear() +actualizarPrecioYStock() +ajustarStock() +eliminar() }
+class ReclamoService { +crear() +cambiarEstado() }
+class ConexionBD { -instancia$ +getInstancia()$ +getConexion() +ejecutarTransaccion(trabajo) }
+class DAOFactory { +getProductoDAO()$ +getUsuarioDAO()$ +getPedidoDAO()$ +getDetallePedidoDAO()$ +getReclamoDAO()$ }
+class PedidoDAO { <<interface>> }
+class ProductoDAO { <<interface>> }
+class UsuarioDAO { <<interface>> }
+class ReclamoDAO { <<interface>> }
+class DetallePedidoDAO { <<interface>> }
+class EstadoPedido { <<interface>> +avanzar(pedido) +getNombreEstado() +esFinal() }
+class EstadoPedidoFactory { +desde(nombre)$ }
+class PedidoSujeto { +agregarObservador() +notificar(msg) }
+class NotificadorPedido { <<interface>> +notificar(msg) }
+class Pedido { +calcularTotal(detalles) }
+PanelController --> ProductoService
+PanelController --> UsuarioService
+PanelController --> ReclamoService
+PanelController --> PedidoFacade
+AuthController --> UsuarioService
+PedidoController --> PedidoFacade
+PedidoFacade --> PedidoService
+PedidoFacade --> ReclamoService
+PedidoFacade --> ConexionBD
+PedidoFacade --> PedidoSujeto
+PedidoService --> EstadoPedidoFactory
+PedidoService --> PedidoSujeto
+EstadoPedidoFactory ..> EstadoPedido
+EstadoPedido <|.. EstadoPendiente
+EstadoPedido <|.. EstadoPagado
+EstadoPedido <|.. EstadoEnDespacho
+EstadoPedido <|.. EstadoEnviado
+EstadoPedido <|.. EstadoEntregado
+NotificadorPedido <|.. NotificadorCliente
+NotificadorPedido <|.. NotificadorAlmacen
+PedidoSujeto o-- NotificadorPedido
+ProductoService --> ProductoDAO
+UsuarioService --> UsuarioDAO
+ReclamoService --> ReclamoDAO
+PedidoService --> PedidoDAO
+DAOFactory ..> PedidoDAO
+DAOFactory ..> ProductoDAO
+DAOFactory ..> UsuarioDAO
+DAOFactory ..> ReclamoDAO
+DAOFactory ..> DetallePedidoDAO
+PedidoDAO ..> ConexionBD
+Pedido ..> EstadoPedido
