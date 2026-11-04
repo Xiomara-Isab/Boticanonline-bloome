@@ -25,6 +25,12 @@ public class ReclamoDAOImpl implements ReclamoDAO {
     }
 
     @Override
+    public Reclamo buscarPorId(int id) {
+        List<Reclamo> lista = listar("SELECT * FROM reclamo WHERE id = ?", id);
+        return lista.isEmpty() ? null : lista.get(0);
+    }
+
+    @Override
     public List<Reclamo> listarTodos() {
         return listar("SELECT * FROM reclamo ORDER BY fecha_creacion DESC, id DESC", null);
     }

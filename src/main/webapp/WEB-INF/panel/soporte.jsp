@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="com.botica.model.*, com.botica.service.ConsultaService, com.botica.util.Html, java.util.*" %>
+<%@ page import="com.botica.model.*, com.botica.patterns.command.HistorialComandos, com.botica.service.ConsultaService, com.botica.util.Html, java.util.*" %>
 <%
   String titulo = "Panel de Soporte";
   Usuario yo = (Usuario) session.getAttribute("usuario");
@@ -12,6 +12,8 @@
     else if ("ESCALADO".equals(r.getEstado())) escalados++;
   }
   String[] estados = {"ABIERTO", "EN_PROCESO", "ESCALADO", "RESUELTO"};
+  HistorialComandos historial = (HistorialComandos) session.getAttribute("historialReclamos");
+  String ultimoCambio = historial == null ? null : historial.ultimaDescripcion();
 %>
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
 
@@ -30,7 +32,15 @@
   </div>
 
   <div class="seccion">
-    <h5 class="mb-3"><i class="bi bi-chat-left-text text-verde"></i> Bandeja de reclamos</h5>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+      <h5 class="mb-0"><i class="bi bi-chat-left-text text-verde"></i> Bandeja de reclamos</h5>
+      <% if (ultimoCambio != null) { %>
+        <form method="post" action="<%= ctx %>/panel">
+          <input type="hidden" name="accion" value="deshacerReclamo">
+          <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-counterclockwise"></i> Deshacer: <%= Html.esc(ultimoCambio) %></button>
+        </form>
+      <% } %>
+    </div>
     <% if (reclamos.isEmpty()) { %><p class="text-muted mb-0">Todavía no hay reclamos registrados.</p><% } else { %>
     <div class="table-responsive">
       <table class="table table-hover">

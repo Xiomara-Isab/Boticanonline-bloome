@@ -2,6 +2,8 @@ package com.botica.controller;
 
 import com.botica.model.Producto;
 import com.botica.model.Usuario;
+import com.botica.patterns.command.Comando;
+import com.botica.patterns.command.HistorialComandos;
 import com.botica.patterns.facade.PedidoFacade;
 import com.botica.service.ProductoService;
 import com.botica.service.ReclamoService;
@@ -96,8 +98,14 @@ public class PanelController extends HttpServlet {
                 }
                 case "estadoReclamo" -> {
                     exigir(u, Constantes.ROL_SOPORTE, Constantes.ROL_ADMINISTRADOR);
-                    reclamoService.cambiarEstado(Integer.parseInt(req.getParameter("id")), req.getParameter("estado"));
+                    reclamoService.cambiarEstado(Integer.parseInt(req.getParameter("id")), req.getParameter("estado"),
+                            historialReclamos(sesion));
                     sesion.setAttribute("flashOk", "Reclamo actualizado");
+                }
+                case "deshacerReclamo" -> {
+                    exigir(u, Constantes.ROL_SOPORTE, Constantes.ROL_ADMINISTRADOR);
+                    Comando deshecho = historialReclamos(sesion).deshacer();
+                    sesion.setAttribute("flashOk", "Deshecho: " + deshecho.descripcion());
                 }
                 case "cambiarRol" -> {
                     exigir(u, Constantes.ROL_ADMINISTRADOR);
@@ -127,6 +135,16 @@ public class PanelController extends HttpServlet {
     private Usuario usuarioActual(HttpServletRequest req) {
         HttpSession sesion = req.getSession(false);
         return sesion == null ? null : (Usuario) sesion.getAttribute("usuario");
+    }
+
+    /** El historial vive en la sesión: cada persona deshace solo sus propios cambios. */
+    private HistorialComandos historialReclamos(HttpSession sesion) {
+        HistorialComandos historial = (HistorialComandos) sesion.getAttribute("historialReclamos");
+        if (historial == null) {
+            historial = new HistorialComandos();
+            sesion.setAttribute("historialReclamos", historial);
+        }
+        return historial;
     }
 
     private void exigir(Usuario u, String... roles) {

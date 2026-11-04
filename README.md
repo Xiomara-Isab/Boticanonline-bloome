@@ -13,5 +13,6 @@ Java 17 · Servlets/JSP (Jakarta) · JDBC · PostgreSQL · Maven (WAR)
 view (JSP) -> controller -> service -> dao (JDBC) -> PostgreSQL
 
 Patrones: Singleton (ConexionBD), Factory (DAOFactory), Facade (PedidoFacade),
-Observer (PedidoSujeto/Notificador*), State (EstadoPedido*), GRASP Controlador y Experto.
+Observer (PedidoSujeto/Notificador*), State (EstadoPedido*),
+Command (patterns/command: deshacer cambios de estado de reclamos), GRASP Controlador y Experto.
 Diagrama de clases: `docs/diagrama-clases.mmd` (pegar en https://mermaid.live).

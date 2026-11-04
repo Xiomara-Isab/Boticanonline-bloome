@@ -24,6 +24,15 @@ class EstadoPedidoFactory { +desde(nombre)$ }
 class PedidoSujeto { +agregarObservador() +notificar(msg) }
 class NotificadorPedido { <<interface>> +notificar(msg) }
 class Pedido { +calcularTotal(detalles) }
+class Comando { <<interface>> +ejecutar() +deshacer() +descripcion() }
+class CambiarEstadoReclamoComando { -estadoAnterior -estadoNuevo }
+class HistorialComandos { +ejecutar(comando) +deshacer() Comando +ultimaDescripcion() }
+Comando <|.. CambiarEstadoReclamoComando
+HistorialComandos o-- Comando
+CambiarEstadoReclamoComando --> ReclamoDAO
+ReclamoService ..> CambiarEstadoReclamoComando
+ReclamoService ..> HistorialComandos
+PanelController --> HistorialComandos
 PanelController --> ProductoService
 PanelController --> UsuarioService
 PanelController --> ReclamoService
