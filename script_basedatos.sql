@@ -1,4 +1,9 @@
+-- Ejecutar completo con psql (o la "PSQL Tool" de pgAdmin), conectado a la base postgres:
+--   psql -U postgres -h localhost -f script_basedatos.sql
+-- En el Query Tool de pgAdmin \c no funciona: crear botica_db, abrir el Query Tool
+-- sobre botica_db y ejecutar desde CREATE TABLE usuario en adelante.
 CREATE DATABASE botica_db;
+\c botica_db
 
 CREATE TABLE usuario (
   id SERIAL PRIMARY KEY,
