@@ -6,6 +6,7 @@ import com.botica.model.Pedido;
 import com.botica.model.Producto;
 import com.botica.model.Reclamo;
 import com.botica.model.Usuario;
+import com.botica.patterns.memento.HistorialPedidos;
 import java.util.List;
 
 /** Consultas de solo lectura para las vistas: así los JSP ya no tocan la capa DAO directamente. */
@@ -28,6 +29,10 @@ public final class ConsultaService {
 
     public static Pedido pedidoPorId(int id) {
         return DAOFactory.getPedidoDAO().buscarPorId(id);
+    }
+
+    public static boolean puedeRevertir(int idPedido) {
+        return HistorialPedidos.getInstancia().ultima(idPedido) != null;
     }
 
     public static List<Pedido> pedidosDeCliente(int idCliente) {

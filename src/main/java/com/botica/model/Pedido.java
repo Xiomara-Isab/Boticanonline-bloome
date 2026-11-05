@@ -27,6 +27,17 @@ public class Pedido {
         this.total = suma;
     }
 
+    /** Memento: saca una foto del estado actual. */
+    public PedidoMemento crearMemento() {
+        return new PedidoMemento(estado, total);
+    }
+
+    /** Memento: vuelve al estado guardado en la foto. */
+    public void restaurar(PedidoMemento foto) {
+        this.estado = foto.estado;
+        this.total = foto.total;
+    }
+
     public int getId() {
         return id;
     }

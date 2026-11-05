@@ -6,9 +6,10 @@ class PedidoController
 class PedidoFacade {
   +realizarPedido(idCliente, items) Pedido
   +avanzarPedido(idPedido) Pedido
+  +revertirPedido(idPedido) Pedido
   +registrarReclamo(idCliente, idPedido, desc)
 }
-class PedidoService { +avanzarEstado(idPedido) Pedido }
+class PedidoService { +avanzarEstado(idPedido) Pedido +revertirEstado(idPedido) Pedido }
 class UsuarioService { +registrarCliente() +autenticar() +crearPersonal() +cambiarRol() }
 class ProductoService { +crear() +actualizarPrecioYStock() +ajustarStock() +eliminar() }
 class ReclamoService { +crear() +cambiarEstado() }
@@ -23,7 +24,12 @@ class EstadoPedido { <<interface>> +avanzar(pedido) +getNombreEstado() +esFinal(
 class EstadoPedidoFactory { +desde(nombre)$ }
 class PedidoSujeto { +agregarObservador() +notificar(msg) }
 class NotificadorPedido { <<interface>> +notificar(msg) }
-class Pedido { +calcularTotal(detalles) }
+class Pedido { +calcularTotal(detalles) +crearMemento() PedidoMemento +restaurar(foto) }
+class PedidoMemento { ~estado ~total }
+class HistorialPedidos { +getInstancia()$ +guardar(idPedido, foto) +ultima(idPedido) PedidoMemento +descartarUltima(idPedido) }
+Pedido ..> PedidoMemento
+HistorialPedidos o-- PedidoMemento
+PedidoService --> HistorialPedidos
 class Comando { <<interface>> +ejecutar() +deshacer() +descripcion() }
 class CambiarEstadoReclamoComando { -estadoAnterior -estadoNuevo }
 class HistorialComandos { +ejecutar(comando) +deshacer() Comando +ultimaDescripcion() }

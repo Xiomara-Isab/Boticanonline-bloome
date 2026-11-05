@@ -20,7 +20,7 @@ import java.util.Locale;
 /**
  * Patrón Facade (Estructural): interfaz simple para las operaciones que combinan varios servicios y DAO.
  * - realizarPedido: pedido + detalle + descuento de stock en UNA transacción, y aviso a los observadores.
- * - avanzarPedido y registrarReclamo: delegan en los servicios correspondientes.
+ * - avanzarPedido, revertirPedido y registrarReclamo: delegan en los servicios correspondientes.
  */
 public class PedidoFacade {
     private final PedidoDAO pedidoDAO;
@@ -92,6 +92,10 @@ public class PedidoFacade {
 
     public Pedido avanzarPedido(int idPedido) {
         return pedidoService.avanzarEstado(idPedido);
+    }
+
+    public Pedido revertirPedido(int idPedido) {
+        return pedidoService.revertirEstado(idPedido);
     }
 
     public void registrarReclamo(int idCliente, int idPedido, String descripcion) {

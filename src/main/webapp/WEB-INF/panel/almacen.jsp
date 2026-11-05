@@ -14,7 +14,8 @@
     if ("PAGADO".equals(p.getEstado())) porPreparar++;
     if ("EN_DESPACHO".equals(p.getEstado())) enDespacho++;
     if ("ENVIADO".equals(p.getEstado())) enviados++;
-    if (!"ENTREGADO".equals(p.getEstado())) activos.add(p);
+    // un entregado por error debe seguir visible para poder revertirlo
+    if (!"ENTREGADO".equals(p.getEstado()) || ConsultaService.puedeRevertir(p.getId())) activos.add(p);
   }
   LocalDate limite = LocalDate.now().plusDays(com.botica.util.Constantes.DIAS_POR_VENCER);
   List<Producto> stockBajo = new ArrayList<>();
@@ -56,11 +57,20 @@
               <td class="text-end"><%= Html.money(p.getTotal()) %></td>
               <td class="text-end">
                 <a class="btn btn-sm btn-outline-secondary" href="<%= ctx %>/seguimiento.jsp?id=<%= p.getId() %>">Ver</a>
+                <% if (ConsultaService.puedeRevertir(p.getId())) { %>
+                <form method="post" action="<%= ctx %>/revertirPedido" class="d-inline">
+                  <input type="hidden" name="idPedido" value="<%= p.getId() %>">
+                  <input type="hidden" name="volver" value="panel">
+                  <button class="btn btn-sm btn-outline-danger"><i class="bi bi-arrow-counterclockwise"></i> Revertir</button>
+                </form>
+                <% } %>
+                <% if (!"ENTREGADO".equals(p.getEstado())) { %>
                 <form method="post" action="<%= ctx %>/avanzarPedido" class="d-inline">
                   <input type="hidden" name="idPedido" value="<%= p.getId() %>">
                   <input type="hidden" name="volver" value="panel">
                   <button class="btn btn-sm btn-primary">Avanzar estado</button>
                 </form>
+                <% } %>
               </td>
             </tr>
           <% } %>

@@ -5,6 +5,7 @@ import com.botica.model.Usuario;
 import com.botica.patterns.facade.ItemCarrito;
 import com.botica.patterns.facade.PedidoFacade;
 import com.botica.util.Constantes;
+import com.botica.util.Html;
 import com.botica.util.ReglaNegocioException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,8 +16,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
-/** GRASP Controlador: coordina compras y avance de pedidos a través del Facade. */
-@WebServlet({"/comprar", "/avanzarPedido"})
+/** GRASP Controlador: coordina compras, avance y reversión de pedidos a través del Facade. */
+@WebServlet({"/comprar", "/avanzarPedido", "/revertirPedido"})
 public class PedidoController extends HttpServlet {
     private final PedidoFacade pedidoFacade = new PedidoFacade();
 
@@ -72,7 +73,13 @@ public class PedidoController extends HttpServlet {
 
         String idTexto = req.getParameter("idPedido");
         try {
-            pedidoFacade.avanzarPedido(Integer.parseInt(idTexto));
+            int idPedido = Integer.parseInt(idTexto);
+            if ("/revertirPedido".equals(req.getServletPath())) {
+                Pedido pedido = pedidoFacade.revertirPedido(idPedido);
+                sesion.setAttribute("flashOk", "Pedido #" + idPedido + " revertido a " + Html.estadoLegible(pedido.getEstado()));
+            } else {
+                pedidoFacade.avanzarPedido(idPedido);
+            }
         } catch (NumberFormatException e) {
             sesion.setAttribute("flashErr", "Pedido no válido");
         } catch (ReglaNegocioException e) {
