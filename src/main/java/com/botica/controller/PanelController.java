@@ -5,7 +5,9 @@ import com.botica.model.Usuario;
 import com.botica.patterns.command.Comando;
 import com.botica.patterns.command.HistorialComandos;
 import com.botica.patterns.facade.PedidoFacade;
+import com.botica.patterns.proxy.ProductoServiceProxy;
 import com.botica.service.ProductoService;
+import com.botica.service.ProductoServiceImpl;
 import com.botica.service.ReclamoService;
 import com.botica.service.UsuarioService;
 import com.botica.util.Constantes;
@@ -21,11 +23,12 @@ import java.time.LocalDate;
 
 /**
  * GRASP Controlador del panel por rol: GET muestra la vista del rol; POST valida el permiso del actor
- * y delega la regla de negocio en el servicio correspondiente.
+ * y delega la regla de negocio en el servicio correspondiente. Las acciones del catálogo pasan por
+ * ProductoServiceProxy, que revisa el rol antes de llegar al servicio real.
  */
 @WebServlet("/panel")
 public class PanelController extends HttpServlet {
-    private final ProductoService productoService = new ProductoService();
+    private final ProductoService productoServiceReal = new ProductoServiceImpl();
     private final UsuarioService usuarioService = new UsuarioService();
     private final ReclamoService reclamoService = new ReclamoService();
     private final PedidoFacade pedidoFacade = new PedidoFacade();
@@ -58,10 +61,10 @@ public class PanelController extends HttpServlet {
         HttpSession sesion = req.getSession();
         String accion = req.getParameter("accion");
         if (accion == null) accion = "";
+        ProductoService productoService = new ProductoServiceProxy(productoServiceReal, u);
         try {
             switch (accion) {
                 case "crearProducto" -> {
-                    exigir(u, Constantes.ROL_VENDEDOR, Constantes.ROL_ADMINISTRADOR);
                     productoService.crear(new Producto(
                             req.getParameter("nombre").trim(),
                             req.getParameter("descripcion"),
@@ -73,20 +76,17 @@ public class PanelController extends HttpServlet {
                     sesion.setAttribute("flashOk", "Producto agregado al catálogo");
                 }
                 case "actualizarProducto" -> {
-                    exigir(u, Constantes.ROL_VENDEDOR, Constantes.ROL_ADMINISTRADOR);
                     productoService.actualizarPrecioYStock(Integer.parseInt(req.getParameter("id")),
                             Double.parseDouble(req.getParameter("precio")),
                             Integer.parseInt(req.getParameter("stock")));
                     sesion.setAttribute("flashOk", "Producto actualizado");
                 }
                 case "ajustarStock" -> {
-                    exigir(u, Constantes.ROL_ALMACEN, Constantes.ROL_ADMINISTRADOR);
                     productoService.ajustarStock(Integer.parseInt(req.getParameter("id")),
                             Integer.parseInt(req.getParameter("stock")));
                     sesion.setAttribute("flashOk", "Stock actualizado");
                 }
                 case "eliminarProducto" -> {
-                    exigir(u, Constantes.ROL_VENDEDOR, Constantes.ROL_ADMINISTRADOR);
                     productoService.eliminar(Integer.parseInt(req.getParameter("id")));
                     sesion.setAttribute("flashOk", "Producto eliminado");
                 }

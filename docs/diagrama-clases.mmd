@@ -11,7 +11,9 @@ class PedidoFacade {
 }
 class PedidoService { +avanzarEstado(idPedido) Pedido +revertirEstado(idPedido) Pedido }
 class UsuarioService { +registrarCliente() +autenticar() +crearPersonal() +cambiarRol() }
-class ProductoService { +crear() +actualizarPrecioYStock() +ajustarStock() +eliminar() }
+class ProductoService { <<interface>> +crear() +actualizarPrecioYStock() +ajustarStock() +eliminar() }
+class ProductoServiceImpl
+class ProductoServiceProxy { -servicioReal -usuario -revisar(accion, roles) }
 class ReclamoService { +crear() +cambiarEstado() }
 class ConexionBD { -instancia$ +getInstancia()$ +getConexion() +ejecutarTransaccion(trabajo) }
 class DAOFactory { +getProductoDAO()$ +getUsuarioDAO()$ +getPedidoDAO()$ +getDetallePedidoDAO()$ +getReclamoDAO()$ }
@@ -39,7 +41,7 @@ CambiarEstadoReclamoComando --> ReclamoDAO
 ReclamoService ..> CambiarEstadoReclamoComando
 ReclamoService ..> HistorialComandos
 PanelController --> HistorialComandos
-PanelController --> ProductoService
+PanelController --> ProductoServiceProxy
 PanelController --> UsuarioService
 PanelController --> ReclamoService
 PanelController --> PedidoFacade
@@ -60,7 +62,10 @@ EstadoPedido <|.. EstadoEntregado
 NotificadorPedido <|.. NotificadorCliente
 NotificadorPedido <|.. NotificadorAlmacen
 PedidoSujeto o-- NotificadorPedido
-ProductoService --> ProductoDAO
+ProductoService <|.. ProductoServiceImpl
+ProductoService <|.. ProductoServiceProxy
+ProductoServiceProxy --> ProductoService : servicioReal
+ProductoServiceImpl --> ProductoDAO
 UsuarioService --> UsuarioDAO
 ReclamoService --> ReclamoDAO
 PedidoService --> PedidoDAO

@@ -15,5 +15,8 @@ view (JSP) -> controller -> service -> dao (JDBC) -> PostgreSQL
 Patrones: Singleton (ConexionBD), Factory (DAOFactory), Facade (PedidoFacade),
 Observer (PedidoSujeto/Notificador*), State (EstadoPedido*),
 Command (patterns/command: deshacer cambios de estado de reclamos),
-Memento (PedidoMemento, patterns/memento: revertir el avance de un pedido), GRASP Controlador y Experto.
+<<<<<<< HEAD
+Memento (PedidoMemento, patterns/memento: revertir el avance de un pedido),
+Proxy (patterns/proxy: ProductoServiceProxy revisa el rol antes de crear/editar/eliminar productos y registra el intento),
+GRASP Controlador y Experto.
 Diagrama de clases: `docs/diagrama-clases.mmd` (pegar en https://mermaid.live).

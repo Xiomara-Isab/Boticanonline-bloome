@@ -95,10 +95,12 @@
                 <td><span class="badge text-bg-<%= p.getStock() == 0 ? "danger" : "warning" %>"><%= p.getStock() %></span></td>
                 <td>
                   <form method="post" action="<%= ctx %>/panel" class="d-flex gap-1">
-                    <input type="hidden" name="accion" value="ajustarStock">
                     <input type="hidden" name="id" value="<%= p.getId() %>">
+                    <input type="hidden" name="precio" value="<%= p.getPrecio() %>">
                     <input name="stock" type="number" min="0" value="<%= p.getStock() %>" class="form-control form-control-sm" style="width:90px;">
-                    <button class="btn btn-sm btn-outline-primary"><i class="bi bi-check2"></i></button>
+                    <button name="accion" value="ajustarStock" class="btn btn-sm btn-outline-primary" title="Ajustar stock"><i class="bi bi-check2"></i></button>
+                    <%-- Demo del Proxy: Almacén no puede editar productos; el guardia responde "No tienes permiso". --%>
+                    <button name="accion" value="actualizarProducto" class="btn btn-sm btn-outline-secondary" title="Editar producto"><i class="bi bi-pencil"></i></button>
                   </form>
                 </td>
               </tr>
