@@ -14,6 +14,7 @@
   TreeSet<String> categorias = new TreeSet<>();
   List<Producto> productos = new ArrayList<>();
   for (Producto p : todos) {
+    if (!p.isActivo()) continue; // los productos desactivados por el vendedor no se muestran
     if (p.getCategoria() != null && !p.getCategoria().isBlank()) categorias.add(p.getCategoria());
     boolean okCat = cat == null || cat.isBlank() || cat.equals(p.getCategoria());
     String texto = (p.getNombre() + " " + (p.getDescripcion() == null ? "" : p.getDescripcion())).toLowerCase();
@@ -24,6 +25,7 @@
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
 
 <div class="container my-4">
+  <%@ include file="/WEB-INF/jspf/flash.jspf" %>
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
     <h2 class="fw-bold mb-0">Catálogo de productos</h2>
     <form method="get" class="d-flex gap-2">
@@ -69,7 +71,10 @@
             <% if (p.getFechaVencimiento() != null) { %>
               <p class="small text-muted mb-2"><i class="bi bi-calendar-event"></i> Vence: <%= p.getFechaVencimiento() %></p>
             <% } %>
-            <div class="precio mb-2"><%= Html.money(p.getPrecio()) %></div>
+            <div class="precio mb-2">
+              <% if (p.getDescuento() > 0) { %><span class="text-muted text-decoration-line-through small me-1"><%= Html.money(p.getPrecio()) %></span><span class="badge text-bg-danger me-1">-<%= p.getDescuento() %>%</span><% } %>
+              <%= Html.money(p.getPrecioFinal()) %>
+            </div>
 
             <% if (agotado) { %>
               <button class="btn btn-secondary w-100" disabled>Sin stock</button>
@@ -78,10 +83,13 @@
             <% } else if (!"Cliente".equals(navU.getRol())) { %>
               <button class="btn btn-secondary w-100" disabled>Solo clientes pueden comprar</button>
             <% } else { %>
-              <form method="post" action="comprar" class="d-flex gap-2">
+              <form method="post" action="carrito" class="d-flex gap-2">
+                <input type="hidden" name="accion" value="agregar">
                 <input type="hidden" name="idProducto" value="<%= p.getId() %>">
+                <input type="hidden" name="volver" value="catalogo.jsp<%= request.getQueryString() == null ? "" : "?" + Html.esc(request.getQueryString()) %>">
                 <input type="number" name="cantidad" value="1" min="1" max="<%= p.getStock() %>" class="form-control" style="width: 90px;">
-                <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-bag-plus"></i> Comprar</button>
+                <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-cart-plus"></i> Agregar</button>
+                <button type="submit" formaction="comprar" class="btn btn-outline-primary" title="Comprar solo este producto ahora"><i class="bi bi-lightning-charge"></i></button>
               </form>
             <% } %>
           </div>

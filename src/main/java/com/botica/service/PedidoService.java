@@ -8,6 +8,7 @@ import com.botica.patterns.EstadoPedido;
 import com.botica.patterns.EstadoPedidoFactory;
 import com.botica.patterns.PedidoSujeto;
 import com.botica.patterns.memento.HistorialPedidos;
+import com.botica.util.Constantes;
 import com.botica.util.ReglaNegocioException;
 
 /** Reglas de negocio del ciclo de vida del pedido (usa State para avanzar, Memento para revertir y Observer para avisar). */
@@ -33,9 +34,13 @@ public class PedidoService {
             if (pedido == null) {
                 throw new ReglaNegocioException("El pedido no existe");
             }
+            if (Constantes.PENDIENTE.equals(pedido.getEstado())) {
+                throw new ReglaNegocioException("El pedido #" + idPedido + " aún no está pagado: el pago lo realiza el cliente");
+            }
             EstadoPedido estadoActual = EstadoPedidoFactory.desde(pedido.getEstado());
             if (estadoActual.esFinal()) {
-                throw new ReglaNegocioException("El pedido #" + idPedido + " ya fue entregado");
+                throw new ReglaNegocioException("El pedido #" + idPedido + " ya no admite más cambios ("
+                        + estadoActual.getNombreEstado().toLowerCase() + ")");
             }
             PedidoMemento foto = pedido.crearMemento();
             estadoActual.avanzar(pedido);
@@ -52,6 +57,9 @@ public class PedidoService {
             Pedido pedido = pedidoDAO.buscarPorId(idPedido);
             if (pedido == null) {
                 throw new ReglaNegocioException("El pedido no existe");
+            }
+            if (Constantes.CANCELADO.equals(pedido.getEstado())) {
+                throw new ReglaNegocioException("El pedido #" + idPedido + " fue cancelado y no se puede revertir");
             }
             PedidoMemento foto = historial.ultima(idPedido);
             if (foto == null) {

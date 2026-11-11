@@ -1,6 +1,15 @@
 <web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
          version="5.0">
   <display-name>BoticaOnline</display-name>
+  <!-- Los .jsp y los fragmentos .jspf (header/footer) se leen como UTF-8. Sin esto Tomcat lee los fragmentos
+       como ISO-8859-1 y las tildes salen como "CatÃ¡logo". -->
+  <jsp-config>
+    <jsp-property-group>
+      <url-pattern>*.jsp</url-pattern>
+      <url-pattern>*.jspf</url-pattern>
+      <page-encoding>UTF-8</page-encoding>
+    </jsp-property-group>
+  </jsp-config>
   <welcome-file-list>
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>

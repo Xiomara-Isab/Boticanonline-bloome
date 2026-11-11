@@ -7,6 +7,13 @@ public final class Constantes {
     public static final int STOCK_BAJO = 10;
     public static final int DIAS_POR_VENCER = 90;
     public static final int LONGITUD_MINIMA_CONTRASENA = 6;
+    public static final int DESCUENTO_MAXIMO = 90;
+
+    // Métodos de pago (patrón Strategy)
+    public static final String PAGO_TARJETA = "TARJETA";
+    public static final String PAGO_YAPE = "YAPE";
+    public static final String PAGO_MERCADO_PAGO = "MERCADO_PAGO";
+    public static final String PAGO_REEMBOLSO = "REEMBOLSO";
 
     // Estados del pedido (patrón State)
     public static final String PENDIENTE = "PENDIENTE";
@@ -14,6 +21,7 @@ public final class Constantes {
     public static final String EN_DESPACHO = "EN_DESPACHO";
     public static final String ENVIADO = "ENVIADO";
     public static final String ENTREGADO = "ENTREGADO";
+    public static final String CANCELADO = "CANCELADO";
 
     // Roles (actores del sistema)
     public static final String ROL_CLIENTE = "Cliente";

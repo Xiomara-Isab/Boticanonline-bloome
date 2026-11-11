@@ -6,6 +6,7 @@ public class Usuario {
     private String correo;
     private String contrasena;
     private String rol;
+    private boolean activo = true;
 
     public Usuario() {
     }
@@ -15,6 +16,14 @@ public class Usuario {
         this.correo = correo;
         this.contrasena = contrasena;
         this.rol = rol;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 
     public int getId() {

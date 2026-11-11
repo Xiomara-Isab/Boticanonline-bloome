@@ -90,6 +90,28 @@ public class PanelController extends HttpServlet {
                     productoService.eliminar(Integer.parseInt(req.getParameter("id")));
                     sesion.setAttribute("flashOk", "Producto eliminado");
                 }
+                case "cambiarActivoProducto" -> {
+                    boolean activo = Boolean.parseBoolean(req.getParameter("activo"));
+                    productoService.cambiarActivo(Integer.parseInt(req.getParameter("id")), activo);
+                    sesion.setAttribute("flashOk", activo ? "Producto activado: vuelve a verse en el catálogo"
+                            : "Producto desactivado: ya no se muestra en el catálogo");
+                }
+                case "aplicarDescuento" -> {
+                    productoService.aplicarDescuento(Integer.parseInt(req.getParameter("id")),
+                            Integer.parseInt(req.getParameter("descuento")));
+                    sesion.setAttribute("flashOk", "Descuento actualizado");
+                }
+                case "registrarIngreso" -> {
+                    productoService.registrarIngreso(Integer.parseInt(req.getParameter("id")),
+                            Integer.parseInt(req.getParameter("cantidad")));
+                    sesion.setAttribute("flashOk", "Ingreso de mercadería registrado");
+                }
+                case "retirarVencidos" -> {
+                    int retirados = productoService.retirarVencidos();
+                    sesion.setAttribute("flashOk", retirados == 0
+                            ? "No hay productos vencidos con stock para retirar"
+                            : retirados + " producto(s) vencido(s) retirado(s) del stock");
+                }
                 case "crearReclamo" -> {
                     exigir(u, Constantes.ROL_CLIENTE);
                     pedidoFacade.registrarReclamo(u.getId(), Integer.parseInt(req.getParameter("idPedido")),
@@ -102,6 +124,18 @@ public class PanelController extends HttpServlet {
                             historialReclamos(sesion));
                     sesion.setAttribute("flashOk", "Reclamo actualizado");
                 }
+                case "responderReclamo" -> {
+                    exigir(u, Constantes.ROL_SOPORTE, Constantes.ROL_ADMINISTRADOR);
+                    reclamoService.responder(u.getId(), Integer.parseInt(req.getParameter("id")),
+                            req.getParameter("respuesta"));
+                    sesion.setAttribute("flashOk", "Respuesta enviada al cliente");
+                }
+                case "reembolsarPedido" -> {
+                    exigir(u, Constantes.ROL_SOPORTE, Constantes.ROL_ADMINISTRADOR);
+                    var reembolso = pedidoFacade.reembolsarPedido(Integer.parseInt(req.getParameter("idPedido")));
+                    sesion.setAttribute("flashOk", "Pedido #" + reembolso.getIdPedido() + " reembolsado ("
+                            + com.botica.util.Html.money(-reembolso.getMonto()) + "). El stock volvió al inventario");
+                }
                 case "deshacerReclamo" -> {
                     exigir(u, Constantes.ROL_SOPORTE, Constantes.ROL_ADMINISTRADOR);
                     Comando deshecho = historialReclamos(sesion).deshacer();
@@ -112,6 +146,18 @@ public class PanelController extends HttpServlet {
                     String nuevoRol = req.getParameter("rol");
                     usuarioService.cambiarRol(u.getId(), Integer.parseInt(req.getParameter("id")), nuevoRol);
                     sesion.setAttribute("flashOk", "Rol actualizado a " + nuevoRol);
+                }
+                case "cambiarActivoUsuario" -> {
+                    exigir(u, Constantes.ROL_ADMINISTRADOR);
+                    boolean activo = Boolean.parseBoolean(req.getParameter("activo"));
+                    usuarioService.cambiarActivo(u.getId(), Integer.parseInt(req.getParameter("id")), activo);
+                    sesion.setAttribute("flashOk", activo ? "Usuario activado" : "Usuario desactivado");
+                }
+                case "resetearContrasena" -> {
+                    exigir(u, Constantes.ROL_ADMINISTRADOR);
+                    usuarioService.resetearContrasena(Integer.parseInt(req.getParameter("id")),
+                            req.getParameter("contrasena"));
+                    sesion.setAttribute("flashOk", "Contraseña restablecida");
                 }
                 case "crearUsuario" -> {
                     exigir(u, Constantes.ROL_ADMINISTRADOR);

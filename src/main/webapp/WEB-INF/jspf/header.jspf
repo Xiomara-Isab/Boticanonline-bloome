@@ -1,3 +1,4 @@
+<%@ page pageEncoding="UTF-8" %>
 <%
   com.botica.model.Usuario navU = (com.botica.model.Usuario) session.getAttribute("usuario");
   String ctx = request.getContextPath();
@@ -7,7 +8,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><%= com.botica.util.Html.esc(titulo) %> · Botica Bloome</title>
+  <title><%= com.botica.util.Html.esc(titulo) %> &#183; Botica Bloome</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -25,11 +26,16 @@
     <div class="collapse navbar-collapse" id="menuPrincipal">
       <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link" href="<%= ctx %>/index.jsp">Inicio</a></li>
-        <li class="nav-item"><a class="nav-link" href="<%= ctx %>/catalogo.jsp">Catálogo</a></li>
+        <li class="nav-item"><a class="nav-link" href="<%= ctx %>/catalogo.jsp">Cat&#225;logo</a></li>
+        <% if (navU != null && "Cliente".equals(navU.getRol())) {
+             com.botica.model.Carrito navC = (com.botica.model.Carrito) session.getAttribute("carrito");
+             int navN = navC == null ? 0 : navC.getCantidadTotal(); %>
+        <li class="nav-item"><a class="nav-link" href="<%= ctx %>/carrito.jsp"><i class="bi bi-cart3"></i> Carrito<% if (navN > 0) { %> <span class="badge rounded-pill text-bg-danger"><%= navN %></span><% } %></a></li>
+        <% } %>
       </ul>
       <% if (navU == null) { %>
         <div class="d-flex gap-2">
-          <a class="btn btn-outline-primary" href="<%= ctx %>/login.jsp">Iniciar sesión</a>
+          <a class="btn btn-outline-primary" href="<%= ctx %>/login.jsp">Iniciar sesi&#243;n</a>
           <a class="btn btn-primary" href="<%= ctx %>/registro.jsp">Crear cuenta</a>
         </div>
       <% } else { %>

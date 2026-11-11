@@ -4,6 +4,10 @@
   String titulo = "Panel de Soporte";
   Usuario yo = (Usuario) session.getAttribute("usuario");
   List<Reclamo> reclamos = ConsultaService.reclamos();
+  Map<Integer, String> nombres = new HashMap<>();
+  Map<Integer, String> estadoPedido = new HashMap<>();
+  for (Pedido ped : ConsultaService.pedidos()) estadoPedido.put(ped.getId(), ped.getEstado());
+  for (Usuario u : ConsultaService.usuarios()) nombres.put(u.getId(), u.getNombre());
   int abiertos = 0, enProceso = 0, resueltos = 0, escalados = 0;
   for (Reclamo r : reclamos) {
     if ("ABIERTO".equals(r.getEstado())) abiertos++;
@@ -44,15 +48,25 @@
     <% if (reclamos.isEmpty()) { %><p class="text-muted mb-0">Todavía no hay reclamos registrados.</p><% } else { %>
     <div class="table-responsive">
       <table class="table table-hover">
-        <thead><tr><th>#</th><th>Pedido</th><th>Descripción</th><th>Fecha</th><th>Estado</th><th>Cambiar estado</th></tr></thead>
+        <thead><tr><th>#</th><th>Pedido</th><th>Descripción</th><th>Fecha</th><th>Estado</th><th>Respondió</th><th>Cambiar estado</th></tr></thead>
         <tbody>
           <% for (Reclamo r : reclamos) { %>
             <tr>
               <td>#<%= r.getId() %></td>
               <td><a href="<%= ctx %>/seguimiento.jsp?id=<%= r.getIdPedido() %>">#<%= r.getIdPedido() %></a></td>
-              <td style="max-width: 320px;"><%= Html.esc(r.getDescripcion()) %></td>
+              <td style="max-width: 360px;">
+                <%= Html.esc(r.getDescripcion()) %>
+                <% if (r.getRespuesta() != null && !r.getRespuesta().isBlank()) { %><div class="small text-success mt-1"><i class="bi bi-reply"></i> <%= Html.esc(r.getRespuesta()) %></div><% } %>
+                <form method="post" action="<%= ctx %>/panel" class="d-flex gap-1 mt-2">
+                  <input type="hidden" name="accion" value="responderReclamo">
+                  <input type="hidden" name="id" value="<%= r.getId() %>">
+                  <input name="respuesta" class="form-control form-control-sm" placeholder="Responder al cliente..." required>
+                  <button class="btn btn-sm btn-primary" title="Enviar respuesta"><i class="bi bi-send"></i></button>
+                </form>
+              </td>
               <td class="small"><%= Html.fecha(r.getFechaCreacion()) %></td>
               <td><span class="badge text-bg-<%= Html.badge(r.getEstado()) %>"><%= Html.estadoLegible(r.getEstado()) %></span></td>
+              <td class="small"><%= r.getIdSoporte() == 0 ? "—" : Html.esc(nombres.get(r.getIdSoporte())) %></td>
               <td>
                 <form method="post" action="<%= ctx %>/panel" class="d-flex gap-1">
                   <input type="hidden" name="accion" value="estadoReclamo">
@@ -62,6 +76,14 @@
                   </select>
                   <button class="btn btn-sm btn-outline-primary"><i class="bi bi-check2"></i></button>
                 </form>
+                <% String estPedido = estadoPedido.get(r.getIdPedido());
+                   if ("PAGADO".equals(estPedido) || "EN_DESPACHO".equals(estPedido)) { %>
+                <form method="post" action="<%= ctx %>/panel" class="mt-1" onsubmit="return confirm('¿Reembolsar el pedido #<%= r.getIdPedido() %> y devolver el stock?');">
+                  <input type="hidden" name="accion" value="reembolsarPedido">
+                  <input type="hidden" name="idPedido" value="<%= r.getIdPedido() %>">
+                  <button class="btn btn-sm btn-outline-danger w-100"><i class="bi bi-arrow-return-left"></i> Reembolsar pedido</button>
+                </form>
+                <% } %>
               </td>
             </tr>
           <% } %>

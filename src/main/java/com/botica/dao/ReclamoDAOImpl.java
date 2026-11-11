@@ -53,6 +53,20 @@ public class ReclamoDAOImpl implements ReclamoDAO {
         }
     }
 
+    @Override
+    public void responder(int id, String respuesta, int idSoporte) {
+        String sql = "UPDATE reclamo SET respuesta = ?, id_soporte = ?, "
+                + "estado = CASE WHEN estado = 'ABIERTO' THEN 'EN_PROCESO' ELSE estado END WHERE id = ?";
+        try (PreparedStatement ps = ConexionBD.getInstancia().getConexion().prepareStatement(sql)) {
+            ps.setString(1, respuesta);
+            ps.setInt(2, idSoporte);
+            ps.setInt(3, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al responder el reclamo", e);
+        }
+    }
+
     private List<Reclamo> listar(String sql, Integer param) {
         List<Reclamo> lista = new ArrayList<>();
         try (PreparedStatement ps = ConexionBD.getInstancia().getConexion().prepareStatement(sql)) {
@@ -64,6 +78,8 @@ public class ReclamoDAOImpl implements ReclamoDAO {
                     r.setIdPedido(rs.getInt("id_pedido"));
                     r.setDescripcion(rs.getString("descripcion"));
                     r.setEstado(rs.getString("estado"));
+                    r.setRespuesta(rs.getString("respuesta"));
+                    r.setIdSoporte(rs.getInt("id_soporte"));
                     Timestamp ts = rs.getTimestamp("fecha_creacion");
                     if (ts != null) r.setFechaCreacion(ts.toLocalDateTime());
                     lista.add(r);

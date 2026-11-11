@@ -1,5 +1,6 @@
 package com.botica.controller;
 
+import com.botica.model.Pago;
 import com.botica.model.Pedido;
 import com.botica.model.Usuario;
 import com.botica.patterns.facade.ItemCarrito;
@@ -16,18 +17,19 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
-/** GRASP Controlador: coordina compras, avance y reversión de pedidos a través del Facade. */
-@WebServlet({"/comprar", "/avanzarPedido", "/revertirPedido"})
+/** GRASP Controlador: coordina compras, pagos, cancelaciones, avance y reversión de pedidos a través del Facade. */
+@WebServlet({"/comprar", "/pagar", "/cancelarPedido", "/avanzarPedido", "/revertirPedido"})
 public class PedidoController extends HttpServlet {
     private final PedidoFacade pedidoFacade = new PedidoFacade();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String ruta = req.getServletPath();
-        if ("/comprar".equals(ruta)) {
-            comprar(req, resp);
-        } else {
-            avanzarPedido(req, resp);
+        req.setCharacterEncoding("UTF-8");
+        switch (req.getServletPath()) {
+            case "/comprar" -> comprar(req, resp);
+            case "/pagar" -> pagar(req, resp);
+            case "/cancelarPedido" -> cancelar(req, resp);
+            default -> avanzarPedido(req, resp);
         }
     }
 
@@ -48,7 +50,8 @@ public class PedidoController extends HttpServlet {
             int idProducto = Integer.parseInt(req.getParameter("idProducto"));
             int cantidad = Integer.parseInt(req.getParameter("cantidad"));
             Pedido pedido = pedidoFacade.realizarPedido(usuario.getId(), List.of(new ItemCarrito(idProducto, cantidad)));
-            resp.sendRedirect(req.getContextPath() + "/seguimiento.jsp?id=" + pedido.getId());
+            // El pedido nace PENDIENTE: el cliente continúa en la pantalla de pago.
+            resp.sendRedirect(req.getContextPath() + "/pago.jsp?id=" + pedido.getId());
         } catch (NumberFormatException e) {
             reenviarCatalogo(req, resp, "Datos de compra inválidos");
         } catch (ReglaNegocioException e) {
@@ -56,6 +59,65 @@ public class PedidoController extends HttpServlet {
         } catch (RuntimeException e) {
             reenviarCatalogo(req, resp, "No se pudo completar el pedido. Inténtalo nuevamente");
         }
+    }
+
+    /** Pago simulado: el cliente elige un método y el pedido pasa de PENDIENTE a PAGADO. */
+    private void pagar(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        HttpSession sesion = req.getSession(false);
+        Usuario usuario = sesion == null ? null : (Usuario) sesion.getAttribute("usuario");
+        if (usuario == null) {
+            resp.sendRedirect(req.getContextPath() + "/login.jsp?sesion=1");
+            return;
+        }
+        if (!Constantes.ROL_CLIENTE.equals(usuario.getRol())) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        String idTexto = req.getParameter("idPedido");
+        try {
+            int idPedido = Integer.parseInt(idTexto);
+            Pago pago = pedidoFacade.pagarPedido(usuario.getId(), idPedido, req.getParameter("metodo"),
+                    req.getParameter("dato"));
+            sesion.setAttribute("flashOk", "Pago aprobado. Código de operación: " + pago.getReferencia());
+            resp.sendRedirect(req.getContextPath() + "/seguimiento.jsp?id=" + idPedido);
+        } catch (NumberFormatException e) {
+            sesion.setAttribute("flashErr", "Pedido no válido");
+            resp.sendRedirect(req.getContextPath() + "/panel");
+        } catch (ReglaNegocioException e) {
+            sesion.setAttribute("flashErr", e.getMessage());
+            resp.sendRedirect(req.getContextPath() + "/pago.jsp?id=" + idTexto);
+        } catch (RuntimeException e) {
+            sesion.setAttribute("flashErr", "No se pudo procesar el pago. Inténtalo nuevamente");
+            resp.sendRedirect(req.getContextPath() + "/pago.jsp?id=" + idTexto);
+        }
+    }
+
+    /** El cliente cancela un pedido que todavía no pagó. */
+    private void cancelar(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        HttpSession sesion = req.getSession(false);
+        Usuario usuario = sesion == null ? null : (Usuario) sesion.getAttribute("usuario");
+        if (usuario == null) {
+            resp.sendRedirect(req.getContextPath() + "/login.jsp?sesion=1");
+            return;
+        }
+        if (!Constantes.ROL_CLIENTE.equals(usuario.getRol())) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        try {
+            int idPedido = Integer.parseInt(req.getParameter("idPedido"));
+            pedidoFacade.cancelarPedido(usuario.getId(), idPedido);
+            sesion.setAttribute("flashOk", "Pedido #" + idPedido + " cancelado. El stock volvió al inventario");
+        } catch (NumberFormatException e) {
+            sesion.setAttribute("flashErr", "Pedido no válido");
+        } catch (ReglaNegocioException e) {
+            sesion.setAttribute("flashErr", e.getMessage());
+        } catch (RuntimeException e) {
+            sesion.setAttribute("flashErr", "No se pudo cancelar el pedido. Inténtalo nuevamente");
+        }
+        resp.sendRedirect(req.getContextPath() + "/panel");
     }
 
     private void avanzarPedido(HttpServletRequest req, HttpServletResponse resp) throws IOException {

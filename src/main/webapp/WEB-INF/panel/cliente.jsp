@@ -8,8 +8,9 @@
   int enCurso = 0;
   double gastado = 0;
   for (Pedido p : pedidos) {
+    if ("CANCELADO".equals(p.getEstado())) continue;
     if (!"ENTREGADO".equals(p.getEstado())) enCurso++;
-    gastado += p.getTotal();
+    if (!"PENDIENTE".equals(p.getEstado())) gastado += p.getTotal(); // solo cuenta lo ya pagado
   }
 %>
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
@@ -48,7 +49,16 @@
                   <td><%= Html.fecha(p.getFechaPedido()) %></td>
                   <td><span class="badge text-bg-<%= Html.badge(p.getEstado()) %>"><%= Html.estadoLegible(p.getEstado()) %></span></td>
                   <td class="text-end"><%= Html.money(p.getTotal()) %></td>
-                  <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="<%= ctx %>/seguimiento.jsp?id=<%= p.getId() %>">Seguimiento</a></td>
+                  <td class="text-end">
+                    <% if ("PENDIENTE".equals(p.getEstado())) { %>
+                      <a class="btn btn-sm btn-primary" href="<%= ctx %>/pago.jsp?id=<%= p.getId() %>"><i class="bi bi-credit-card"></i> Pagar</a>
+                      <form method="post" action="<%= ctx %>/cancelarPedido" class="d-inline" onsubmit="return confirm('¿Cancelar este pedido?');">
+                        <input type="hidden" name="idPedido" value="<%= p.getId() %>">
+                        <button class="btn btn-sm btn-outline-danger">Cancelar</button>
+                      </form>
+                    <% } %>
+                    <a class="btn btn-sm btn-outline-primary" href="<%= ctx %>/seguimiento.jsp?id=<%= p.getId() %>">Seguimiento</a>
+                  </td>
                 </tr>
               <% } %>
             </tbody>
@@ -86,6 +96,9 @@
           <div class="border-bottom pb-2 mb-2">
             <div class="d-flex justify-content-between"><strong>Pedido #<%= r.getIdPedido() %></strong><span class="badge text-bg-<%= Html.badge(r.getEstado()) %>"><%= Html.estadoLegible(r.getEstado()) %></span></div>
             <div class="small text-muted"><%= Html.esc(r.getDescripcion()) %></div>
+            <% if (r.getRespuesta() != null && !r.getRespuesta().isBlank()) { %>
+              <div class="small text-success mt-1"><i class="bi bi-reply"></i> Soporte: <%= Html.esc(r.getRespuesta()) %></div>
+            <% } %>
           </div>
         <% } %>
       </div>
