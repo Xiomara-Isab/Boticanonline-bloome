@@ -15,7 +15,7 @@
     porRol.merge(u.getRol(), 1, Integer::sum);
   }
   double ventas = 0;
-  for (Pedido p : pedidos) ventas += p.getTotal();
+  for (Pedido p : pedidos) if (!"CANCELADO".equals(p.getEstado())) ventas += p.getTotal();
   int reclamosAbiertos = 0;
   for (Reclamo r : reclamos) if (!"RESUELTO".equals(r.getEstado())) reclamosAbiertos++;
 %>
@@ -46,10 +46,11 @@
         </div>
         <div class="table-responsive" style="max-height: 320px; overflow-y: auto;">
           <table class="table table-sm table-hover">
-            <thead><tr><th>#</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Cambiar rol</th></tr></thead>
+            <thead><tr><th>#</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Cambiar rol</th><th>Acciones</th></tr></thead>
             <tbody>
               <% for (Usuario u : usuarios) { %>
                 <tr><td><%= u.getId() %></td><td><%= Html.esc(u.getNombre()) %></td><td><%= Html.esc(u.getCorreo()) %></td><td><span class="badge text-bg-secondary"><%= Html.esc(u.getRol()) %></span></td>
+                  <td><span class="badge text-bg-<%= u.isActivo() ? "success" : "secondary" %>"><%= u.isActivo() ? "Activo" : "Inactivo" %></span></td>
                   <td>
                     <% if (u.getId() != yo.getId()) { %>
                     <form method="post" action="<%= ctx %>/panel" class="d-flex gap-1">
@@ -61,6 +62,26 @@
                       <button class="btn btn-sm btn-outline-primary"><i class="bi bi-check2"></i></button>
                     </form>
                     <% } else { %><span class="text-muted small">(tú)</span><% } %>
+                  </td>
+                  <td>
+                    <% if (u.getId() != yo.getId()) { %>
+                    <div class="d-flex gap-1 flex-wrap">
+                      <form method="post" action="<%= ctx %>/panel">
+                        <input type="hidden" name="accion" value="cambiarActivoUsuario">
+                        <input type="hidden" name="id" value="<%= u.getId() %>">
+                        <input type="hidden" name="activo" value="<%= !u.isActivo() %>">
+                        <button class="btn btn-sm btn-outline-<%= u.isActivo() ? "danger" : "success" %>"><%= u.isActivo() ? "Desactivar" : "Activar" %></button>
+                      </form>
+                      <% if (!"Cliente".equals(u.getRol())) { %>
+                      <form method="post" action="<%= ctx %>/panel" class="d-flex gap-1">
+                        <input type="hidden" name="accion" value="resetearContrasena">
+                        <input type="hidden" name="id" value="<%= u.getId() %>">
+                        <input name="contrasena" type="password" minlength="6" class="form-control form-control-sm" style="width:130px;" placeholder="Nueva contraseña" required>
+                        <button class="btn btn-sm btn-outline-warning" title="Restablecer contraseña"><i class="bi bi-key"></i></button>
+                      </form>
+                      <% } %>
+                    </div>
+                    <% } %>
                   </td></tr>
               <% } %>
             </tbody>

@@ -5,7 +5,7 @@
   List<Producto> destacados = new ArrayList<>();
   try {
     for (Producto p : ConsultaService.productos()) {
-      if (p.getStock() > 0 && destacados.size() < 6) destacados.add(p);
+      if (p.isActivo() && p.getStock() > 0 && destacados.size() < 6) destacados.add(p);
     }
   } catch (RuntimeException e) {
     // Si la base de datos no responde, la portada igual se muestra.
@@ -72,7 +72,7 @@
             <h5 class="card-title"><%= Html.esc(p.getNombre()) %></h5>
             <p class="card-text text-muted small flex-grow-1"><%= Html.esc(p.getDescripcion()) %></p>
             <div class="d-flex justify-content-between align-items-center">
-              <span class="precio"><%= Html.money(p.getPrecio()) %></span>
+              <span class="precio"><%= Html.money(p.getPrecioFinal()) %></span>
               <a class="btn btn-outline-primary btn-sm" href="catalogo.jsp?q=<%= java.net.URLEncoder.encode(p.getNombre(), "UTF-8") %>">Ver</a>
             </div>
           </div>

@@ -2,6 +2,8 @@ package com.botica.dao.factory;
 
 import com.botica.dao.DetallePedidoDAO;
 import com.botica.dao.DetallePedidoDAOImpl;
+import com.botica.dao.PagoDAO;
+import com.botica.dao.PagoDAOImpl;
 import com.botica.dao.PedidoDAO;
 import com.botica.dao.PedidoDAOImpl;
 import com.botica.dao.ProductoDAO;
@@ -27,6 +29,10 @@ public class DAOFactory {
 
     public static DetallePedidoDAO getDetallePedidoDAO() {
         return new DetallePedidoDAOImpl();
+    }
+
+    public static PagoDAO getPagoDAO() {
+        return new PagoDAOImpl();
     }
 
     public static ReclamoDAO getReclamoDAO() {

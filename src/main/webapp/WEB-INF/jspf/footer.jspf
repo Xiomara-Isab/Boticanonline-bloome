@@ -1,7 +1,8 @@
+<%@ page pageEncoding="UTF-8" %>
 <footer class="footer-botica mt-5 py-4">
   <div class="container d-flex flex-column flex-md-row justify-content-between gap-2">
-    <div><i class="bi bi-capsule-pill me-1"></i> <strong>Botica Bloome</strong> · Tu salud, a un clic</div>
-    <div class="small">Pedidos online · Seguimiento en tiempo real · Atención al cliente</div>
+    <div><i class="bi bi-capsule-pill me-1"></i> <strong>Botica Bloome</strong> &#183; Tu salud, a un clic</div>
+    <div class="small">Pedidos online &#183; Seguimiento en tiempo real &#183; Atenci&#243;n al cliente</div>
   </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

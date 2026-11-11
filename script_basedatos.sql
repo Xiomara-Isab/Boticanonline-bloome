@@ -1,16 +1,14 @@
--- Ejecutar completo con psql (o la "PSQL Tool" de pgAdmin), conectado a la base postgres:
---   psql -U postgres -h localhost -f script_basedatos.sql
--- En el Query Tool de pgAdmin \c no funciona: crear botica_db, abrir el Query Tool
--- sobre botica_db y ejecutar desde CREATE TABLE usuario en adelante.
+
 CREATE DATABASE botica_db;
-\c botica_db
+
 
 CREATE TABLE usuario (
   id SERIAL PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
   correo VARCHAR(100) UNIQUE NOT NULL,
   contrasena VARCHAR(255) NOT NULL,
-  rol VARCHAR(30) NOT NULL
+  rol VARCHAR(30) NOT NULL,
+  activo BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 CREATE TABLE producto (
@@ -21,7 +19,9 @@ CREATE TABLE producto (
   stock INT NOT NULL DEFAULT 0,
   categoria VARCHAR(50),
   fecha_vencimiento DATE,
-  id_vendedor INT REFERENCES usuario(id)
+  id_vendedor INT REFERENCES usuario(id),
+  activo BOOLEAN NOT NULL DEFAULT TRUE,
+  descuento INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE pedido (
@@ -45,7 +45,18 @@ CREATE TABLE reclamo (
   id_pedido INT REFERENCES pedido(id),
   descripcion TEXT,
   estado VARCHAR(30) DEFAULT 'ABIERTO',
-  fecha_creacion TIMESTAMP DEFAULT NOW()
+  fecha_creacion TIMESTAMP DEFAULT NOW(),
+  respuesta TEXT,
+  id_soporte INT REFERENCES usuario(id)
+);
+
+CREATE TABLE pago (
+  id SERIAL PRIMARY KEY,
+  id_pedido INT REFERENCES pedido(id),
+  metodo VARCHAR(30) NOT NULL,
+  monto NUMERIC(10,2) NOT NULL,
+  referencia VARCHAR(40),
+  fecha TIMESTAMP DEFAULT NOW()
 );
 
 
@@ -71,7 +82,7 @@ INSERT INTO producto (nombre, descripcion, precio, stock, categoria, fecha_venci
   ('Pañales etapa 3 x 40', 'Máxima absorción para bebés de 6 a 10 kg.', 52.90, 30, 'Bebés', NULL, (SELECT id FROM usuario WHERE correo='vendedor@botica.com')),
   ('Crema para coceduras 100 g', 'Protege la piel sensible del bebé.', 14.20, 0, 'Bebés', CURRENT_DATE + 365, (SELECT id FROM usuario WHERE correo='vendedor@botica.com'));
 
--- Pedidos de ejemplo del cliente demo
+-- Pedidos de ejemplo 
 INSERT INTO pedido (id_cliente, fecha_pedido, estado, total) VALUES
   ((SELECT id FROM usuario WHERE correo='cliente@botica.com'), NOW() - INTERVAL '6 days', 'ENTREGADO', 33.40),
   ((SELECT id FROM usuario WHERE correo='cliente@botica.com'), NOW() - INTERVAL '3 days', 'ENVIADO', 48.00),
@@ -90,3 +101,9 @@ INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, subtotal) VALUES
 INSERT INTO reclamo (id_pedido, descripcion, estado) VALUES
   ((SELECT MIN(id) + 1 FROM pedido), 'Mi pedido sigue en camino y aún no llega, ¿pueden confirmar la fecha de entrega?', 'ABIERTO'),
   ((SELECT MIN(id) FROM pedido), 'Una de las cajas llegó con el empaque golpeado.', 'RESUELTO');
+
+-- Pagos de los pedidos de ejemplo 
+INSERT INTO pago (id_pedido, metodo, monto, referencia) VALUES
+  ((SELECT MIN(id) FROM pedido), 'TARJETA', 33.40, 'TJ-10000001'),
+  ((SELECT MIN(id) + 1 FROM pedido), 'YAPE', 48.00, 'YP-10000002'),
+  ((SELECT MIN(id) + 2 FROM pedido), 'MERCADO_PAGO', 45.00, 'MP-10000003');

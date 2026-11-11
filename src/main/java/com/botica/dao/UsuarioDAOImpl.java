@@ -77,6 +77,30 @@ public class UsuarioDAOImpl implements UsuarioDAO {
         }
     }
 
+    @Override
+    public void actualizarActivo(int id, boolean activo) {
+        String sql = "UPDATE usuario SET activo = ? WHERE id = ?";
+        try (PreparedStatement ps = ConexionBD.getInstancia().getConexion().prepareStatement(sql)) {
+            ps.setBoolean(1, activo);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al cambiar el estado del usuario", e);
+        }
+    }
+
+    @Override
+    public void actualizarContrasena(int id, String contrasenaHasheada) {
+        String sql = "UPDATE usuario SET contrasena = ? WHERE id = ?";
+        try (PreparedStatement ps = ConexionBD.getInstancia().getConexion().prepareStatement(sql)) {
+            ps.setString(1, contrasenaHasheada);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al actualizar la contraseña", e);
+        }
+    }
+
     private Usuario mapear(ResultSet rs) throws SQLException {
         Usuario u = new Usuario();
         u.setId(rs.getInt("id"));
@@ -84,6 +108,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
         u.setCorreo(rs.getString("correo"));
         u.setContrasena(rs.getString("contrasena"));
         u.setRol(rs.getString("rol"));
+        u.setActivo(rs.getBoolean("activo"));
         return u;
     }
 }

@@ -23,6 +23,10 @@ public class ProductoProxyCheck {
         @Override public void actualizarPrecioYStock(int id, double precio, int stock) { LLEGARON.add("editar"); }
         @Override public void ajustarStock(int id, int stock) { LLEGARON.add("stock"); }
         @Override public void eliminar(int id) { LLEGARON.add("eliminar"); }
+        @Override public void cambiarActivo(int id, boolean activo) { LLEGARON.add("activo"); }
+        @Override public void aplicarDescuento(int id, int porcentaje) { LLEGARON.add("descuento"); }
+        @Override public void registrarIngreso(int id, int cantidad) { LLEGARON.add("ingreso"); }
+        @Override public int retirarVencidos() { LLEGARON.add("vencidos"); return 0; }
     };
 
     public static void main(String[] args) {
@@ -56,6 +60,21 @@ public class ProductoProxyCheck {
         assert LLEGARON.isEmpty() : LLEGARON;
         assert registro.contains("almacen@botica.com (Almacen) intentó editar el producto #1: DENEGADO") : registro;
         assert registro.contains("cliente@botica.com (Cliente) intentó eliminar el producto #1: DENEGADO") : registro;
+
+        // acciones nuevas: Vendedor (activar y descuento), Almacén (ingreso y vencidos), Admin (todo)
+        LLEGARON.clear();
+        vendedor.cambiarActivo(1, false);
+        vendedor.aplicarDescuento(1, 20);
+        almacen.registrarIngreso(1, 30);
+        almacen.retirarVencidos();
+        admin.aplicarDescuento(1, 10);
+        assert LLEGARON.equals(List.of("activo", "descuento", "ingreso", "vencidos", "descuento")) : LLEGARON;
+        LLEGARON.clear();
+        denegado(() -> almacen.aplicarDescuento(1, 20));
+        denegado(() -> vendedor.registrarIngreso(1, 30));
+        denegado(() -> cliente.retirarVencidos());
+        denegado(() -> cliente.cambiarActivo(1, true));
+        assert LLEGARON.isEmpty() : LLEGARON;
         System.out.println("OK");
     }
 

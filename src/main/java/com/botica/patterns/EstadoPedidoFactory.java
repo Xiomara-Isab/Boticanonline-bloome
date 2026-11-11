@@ -11,7 +11,8 @@ public final class EstadoPedidoFactory {
             Constantes.PAGADO, new EstadoPagado(),
             Constantes.EN_DESPACHO, new EstadoEnDespacho(),
             Constantes.ENVIADO, new EstadoEnviado(),
-            Constantes.ENTREGADO, new EstadoEntregado());
+            Constantes.ENTREGADO, new EstadoEntregado(),
+            Constantes.CANCELADO, new EstadoCancelado());
 
     private EstadoPedidoFactory() {
     }

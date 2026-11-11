@@ -11,6 +11,7 @@
   int porPreparar = 0, enDespacho = 0, enviados = 0;
   List<Pedido> activos = new ArrayList<>();
   for (Pedido p : pedidos) {
+    if ("CANCELADO".equals(p.getEstado())) continue;
     if ("PAGADO".equals(p.getEstado())) porPreparar++;
     if ("EN_DESPACHO".equals(p.getEstado())) enDespacho++;
     if ("ENVIADO".equals(p.getEstado())) enviados++;
@@ -64,7 +65,9 @@
                   <button class="btn btn-sm btn-outline-danger"><i class="bi bi-arrow-counterclockwise"></i> Revertir</button>
                 </form>
                 <% } %>
-                <% if (!"ENTREGADO".equals(p.getEstado())) { %>
+                <% if ("PENDIENTE".equals(p.getEstado())) { %>
+                <span class="small text-muted">Esperando pago del cliente</span>
+                <% } else if (!"ENTREGADO".equals(p.getEstado())) { %>
                 <form method="post" action="<%= ctx %>/avanzarPedido" class="d-inline">
                   <input type="hidden" name="idPedido" value="<%= p.getId() %>">
                   <input type="hidden" name="volver" value="panel">
@@ -96,11 +99,8 @@
                 <td>
                   <form method="post" action="<%= ctx %>/panel" class="d-flex gap-1">
                     <input type="hidden" name="id" value="<%= p.getId() %>">
-                    <input type="hidden" name="precio" value="<%= p.getPrecio() %>">
                     <input name="stock" type="number" min="0" value="<%= p.getStock() %>" class="form-control form-control-sm" style="width:90px;">
                     <button name="accion" value="ajustarStock" class="btn btn-sm btn-outline-primary" title="Ajustar stock"><i class="bi bi-check2"></i></button>
-                    <%-- Demo del Proxy: Almacén no puede editar productos; el guardia responde "No tienes permiso". --%>
-                    <button name="accion" value="actualizarProducto" class="btn btn-sm btn-outline-secondary" title="Editar producto"><i class="bi bi-pencil"></i></button>
                   </form>
                 </td>
               </tr>
@@ -111,8 +111,27 @@
       </div>
     </div>
     <div class="col-lg-5">
+      <div class="seccion mb-4">
+        <h5 class="mb-3"><i class="bi bi-box-arrow-in-down text-verde"></i> Registrar ingreso de mercadería</h5>
+        <form method="post" action="<%= ctx %>/panel" class="row g-2">
+          <input type="hidden" name="accion" value="registrarIngreso">
+          <div class="col-12">
+            <select name="id" class="form-select" required>
+              <% for (Producto p : productos) { %><option value="<%= p.getId() %>"><%= Html.esc(p.getNombre()) %> (stock <%= p.getStock() %>)</option><% } %>
+            </select>
+          </div>
+          <div class="col-7"><input name="cantidad" type="number" min="1" class="form-control" placeholder="Cantidad que ingresa" required></div>
+          <div class="col-5"><button class="btn btn-primary w-100">Registrar</button></div>
+        </form>
+      </div>
       <div class="seccion">
-        <h5 class="mb-3"><i class="bi bi-calendar-x text-warning"></i> Por vencer (90 días)</h5>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0"><i class="bi bi-calendar-x text-warning"></i> Por vencer (90 días)</h5>
+          <form method="post" action="<%= ctx %>/panel" onsubmit="return confirm('¿Poner en 0 el stock de los productos ya vencidos?');">
+            <input type="hidden" name="accion" value="retirarVencidos">
+            <button class="btn btn-sm btn-outline-danger">Retirar vencidos</button>
+          </form>
+        </div>
         <% if (porVencer.isEmpty()) { %><p class="text-muted mb-0">Ningún producto vence pronto.</p><% } %>
         <% for (Producto p : porVencer) { %>
           <div class="d-flex justify-content-between border-bottom py-2">

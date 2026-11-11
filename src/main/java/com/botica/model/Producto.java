@@ -11,6 +11,8 @@ public class Producto {
     private String categoria;
     private LocalDate fechaVencimiento;
     private int idVendedor;
+    private boolean activo = true;
+    private int descuento;
 
     public Producto() {
     }
@@ -79,6 +81,27 @@ public class Producto {
 
     public void setFechaVencimiento(LocalDate fechaVencimiento) {
         this.fechaVencimiento = fechaVencimiento;
+    }
+
+    /** Precio que paga el cliente: el precio de lista menos el descuento (en %). */
+    public double getPrecioFinal() {
+        return Math.round(precio * (100 - descuento)) / 100.0;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
+    public int getDescuento() {
+        return descuento;
+    }
+
+    public void setDescuento(int descuento) {
+        this.descuento = descuento;
     }
 
     public int getIdVendedor() {

@@ -14,4 +14,9 @@ public interface ProductoService {
     void ajustarStock(int idProducto, int stock);
 
     void eliminar(int idProducto);
+    void cambiarActivo(int idProducto, boolean activo);
+    void aplicarDescuento(int idProducto, int porcentaje);
+    void registrarIngreso(int idProducto, int cantidad);
+    /** Pone en cero el stock de los productos ya vencidos. Devuelve cuántos se retiraron. */
+    int retirarVencidos();
 }

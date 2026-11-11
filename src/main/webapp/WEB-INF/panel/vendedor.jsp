@@ -11,6 +11,7 @@
   List<String[]> misVentas = new ArrayList<>();
   double totalVendido = 0;
   for (Pedido ped : ConsultaService.pedidos()) {
+    if ("CANCELADO".equals(ped.getEstado())) continue;
     for (DetallePedido d : ConsultaService.detallesDePedido(ped.getId())) {
       if (misProductos.contains(d.getIdProducto())) {
         misVentas.add(new String[]{String.valueOf(ped.getId()), nombresProd.get(d.getIdProducto()), String.valueOf(d.getCantidad()), Html.money(d.getSubtotal()), ped.getEstado()});
@@ -71,11 +72,11 @@
         <h5 class="mb-3"><i class="bi bi-list-ul text-verde"></i> Inventario y precios</h5>
         <div class="table-responsive">
           <table class="table table-hover">
-            <thead><tr><th>Producto</th><th>Vence</th><th>Precio (S/) y stock</th><th></th></tr></thead>
+            <thead><tr><th>Producto</th><th>Vence</th><th>Precio (S/) y stock</th><th>Descuento</th><th></th></tr></thead>
             <tbody>
               <% for (Producto p : productos) { %>
                 <tr>
-                  <td><strong><%= Html.esc(p.getNombre()) %></strong><br><span class="badge text-bg-light"><%= Html.esc(p.getCategoria()) %></span></td>
+                  <td><strong><%= Html.esc(p.getNombre()) %></strong><br><span class="badge text-bg-light"><%= Html.esc(p.getCategoria()) %></span><% if (!p.isActivo()) { %> <span class="badge text-bg-secondary">Inactivo</span><% } %></td>
                   <td class="small"><%= p.getFechaVencimiento() == null ? "-" : p.getFechaVencimiento() %></td>
                   <td>
                     <form method="post" action="<%= ctx %>/panel" class="d-flex gap-1">
@@ -87,7 +88,21 @@
                     </form>
                   </td>
                   <td>
-                    <form method="post" action="<%= ctx %>/panel" onsubmit="return confirm('¿Eliminar este producto?');">
+                    <form method="post" action="<%= ctx %>/panel" class="d-flex gap-1 align-items-center">
+                      <input type="hidden" name="accion" value="aplicarDescuento">
+                      <input type="hidden" name="id" value="<%= p.getId() %>">
+                      <input name="descuento" type="number" min="0" max="90" value="<%= p.getDescuento() %>" class="form-control form-control-sm" style="width:70px;"><span class="small text-muted">%</span>
+                      <button class="btn btn-sm btn-outline-primary" title="Aplicar descuento"><i class="bi bi-percent"></i></button>
+                    </form>
+                  </td>
+                  <td class="text-nowrap">
+                    <form method="post" action="<%= ctx %>/panel" class="d-inline">
+                      <input type="hidden" name="accion" value="cambiarActivoProducto">
+                      <input type="hidden" name="id" value="<%= p.getId() %>">
+                      <input type="hidden" name="activo" value="<%= !p.isActivo() %>">
+                      <button class="btn btn-sm btn-outline-secondary" title="<%= p.isActivo() ? "Desactivar (ocultar del catálogo)" : "Activar" %>"><i class="bi <%= p.isActivo() ? "bi-eye-slash" : "bi-eye" %>"></i></button>
+                    </form>
+                    <form method="post" action="<%= ctx %>/panel" class="d-inline" onsubmit="return confirm('¿Eliminar este producto?');">
                       <input type="hidden" name="accion" value="eliminarProducto">
                       <input type="hidden" name="id" value="<%= p.getId() %>">
                       <button class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="bi bi-trash"></i></button>

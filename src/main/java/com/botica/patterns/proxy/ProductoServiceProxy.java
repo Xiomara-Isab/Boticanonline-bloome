@@ -45,6 +45,32 @@ public class ProductoServiceProxy implements ProductoService {
         servicioReal.eliminar(idProducto);
     }
 
+    @Override
+    public void cambiarActivo(int idProducto, boolean activo) {
+        revisar((activo ? "activar" : "desactivar") + " el producto #" + idProducto,
+                Constantes.ROL_VENDEDOR, Constantes.ROL_ADMINISTRADOR);
+        servicioReal.cambiarActivo(idProducto, activo);
+    }
+
+    @Override
+    public void aplicarDescuento(int idProducto, int porcentaje) {
+        revisar("aplicar un descuento al producto #" + idProducto, Constantes.ROL_VENDEDOR, Constantes.ROL_ADMINISTRADOR);
+        servicioReal.aplicarDescuento(idProducto, porcentaje);
+    }
+
+    @Override
+    public void registrarIngreso(int idProducto, int cantidad) {
+        revisar("registrar el ingreso de mercadería del producto #" + idProducto,
+                Constantes.ROL_ALMACEN, Constantes.ROL_ADMINISTRADOR);
+        servicioReal.registrarIngreso(idProducto, cantidad);
+    }
+
+    @Override
+    public int retirarVencidos() {
+        revisar("retirar los productos vencidos", Constantes.ROL_ALMACEN, Constantes.ROL_ADMINISTRADOR);
+        return servicioReal.retirarVencidos();
+    }
+
     /** Deja constancia del intento y, si el rol no está entre los permitidos, corta el paso. */
     private void revisar(String accion, String... rolesPermitidos) {
         String quien = usuario.getCorreo() + " (" + usuario.getRol() + ")";

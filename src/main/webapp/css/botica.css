@@ -14,13 +14,14 @@ h1, h2, h3 { line-height: 1.2; }
 .btn-outline-primary { --bs-btn-color: var(--verde); --bs-btn-border-color: var(--verde); --bs-btn-hover-bg: var(--verde); --bs-btn-hover-border-color: var(--verde); --bs-btn-active-bg: var(--verde-oscuro); }
 a { color: var(--verde); }
 .text-verde { color: var(--verde) !important; }
-.navbar-botica { background: #fff; box-shadow: 0 1px 8px rgba(0,0,0,.07); }
+/* La barra queda siempre por encima del contenido y con fondo sólido: así el texto no se ve por detrás al hacer scroll. */
+.navbar-botica { background: #fff !important; box-shadow: 0 1px 8px rgba(0,0,0,.07); position: sticky; top: 0; z-index: 2000; }
 .navbar-botica .navbar-brand { font-weight: 700; color: var(--verde-oscuro); }
 .navbar-botica .nav-link { color: var(--tinta); font-weight: 500; }
 .navbar-botica .nav-link:hover { color: var(--verde); }
 
 /* Portada */
-.hero { background: linear-gradient(120deg, #0a6b53 0%, #0e8f6e 55%, #3bb99a 100%); color: #fff; padding: 5rem 0 4.5rem; position: relative; overflow: hidden; }
+.hero { background: linear-gradient(120deg, #0a6b53 0%, #0e8f6e 55%, #3bb99a 100%); color: #fff; padding: 5rem 0 4.5rem; position: relative; z-index: 0; overflow: hidden; }
 .hero::after { content: ""; position: absolute; right: -80px; top: -80px; width: 380px; height: 380px; border-radius: 50%; background: rgba(255,255,255,.08); }
 .hero h1 { font-weight: 800; letter-spacing: -.5px; }
 .hero .buscador { background: #fff; border-radius: 50rem; padding: .35rem; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
@@ -65,3 +66,6 @@ a { color: var(--verde); }
 .timeline li.hecho .punto { background: var(--verde); }
 .timeline li.actual { font-weight: 700; }
 .timeline li.actual .punto { box-shadow: 0 0 0 5px rgba(14,143,110,.2); }
+
+.metodo-pago { padding: .75rem 1rem .75rem 2.25rem; border: 1px solid #dfe5e2; border-radius: .75rem; }
+.metodo-pago:has(input:checked) { border-color: var(--verde); background: #f1faf7; }

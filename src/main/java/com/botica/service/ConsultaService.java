@@ -2,6 +2,7 @@ package com.botica.service;
 
 import com.botica.dao.factory.DAOFactory;
 import com.botica.model.DetallePedido;
+import com.botica.model.Pago;
 import com.botica.model.Pedido;
 import com.botica.model.Producto;
 import com.botica.model.Reclamo;
@@ -41,6 +42,10 @@ public final class ConsultaService {
 
     public static List<DetallePedido> detallesDePedido(int idPedido) {
         return DAOFactory.getDetallePedidoDAO().listarPorPedido(idPedido);
+    }
+
+    public static List<Pago> pagosDePedido(int idPedido) {
+        return DAOFactory.getPagoDAO().listarPorPedido(idPedido);
     }
 
     public static List<Reclamo> reclamos() {

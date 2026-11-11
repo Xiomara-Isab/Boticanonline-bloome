@@ -12,7 +12,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 /** Protege solo las áreas privadas. La portada y el catálogo son públicos. */
-@WebFilter({"/panel", "/seguimiento.jsp"})
+@WebFilter({"/panel", "/seguimiento.jsp", "/pago.jsp", "/carrito.jsp"})
 public class AuthFilter implements Filter {
 
     @Override
