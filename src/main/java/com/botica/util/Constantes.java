@@ -29,8 +29,18 @@ public final class Constantes {
     public static final String ROL_ALMACEN = "Almacen";
     public static final String ROL_SOPORTE = "Soporte";
     public static final String ROL_ADMINISTRADOR = "Administrador";
+    public static final String ROL_AUDITOR = "Auditor";
     public static final List<String> ROLES =
-            List.of(ROL_CLIENTE, ROL_VENDEDOR, ROL_ALMACEN, ROL_SOPORTE, ROL_ADMINISTRADOR);
+            List.of(ROL_CLIENTE, ROL_VENDEDOR, ROL_ALMACEN, ROL_SOPORTE, ROL_ADMINISTRADOR, ROL_AUDITOR);
+
+    // Acciones de auditoría de la sesión (las de pedidos las pone NotificadorAuditoria)
+    public static final String AUD_LOGIN = "LOGIN";
+    public static final String AUD_LOGIN_FALLIDO = "LOGIN_FALLIDO";
+    public static final String AUD_LOGIN_BLOQUEADO = "LOGIN_BLOQUEADO";
+    public static final String AUD_LOGOUT = "LOGOUT";
+    public static final String AUD_ACCESO_DENEGADO = "ACCESO_DENEGADO";
+    public static final int LOGIN_MAX_INTENTOS = 5;
+    public static final int LOGIN_MINUTOS_BLOQUEO = 15;
 
     // Estados del reclamo
     public static final String RECLAMO_ABIERTO = "ABIERTO";

@@ -1,3 +1,22 @@
 # BoticaOnline
 
 Java 17 · Servlets/JSP (Jakarta) · JDBC · PostgreSQL · Maven (WAR)
+
+## Puesta en marcha
+1. Ejecutar `script_basedatos.sql` en PostgreSQL (usuarios demo, contraseña `Botica123`:
+   cliente@, vendedor@, almacen@, soporte@, admin@, auditor@ + `botica.com`).
+2. (Opcional) Variables de entorno: `BOTICA_DB_URL`, `BOTICA_DB_USER`, `BOTICA_DB_PASSWORD`
+   (por defecto: localhost:5432/botica_db, postgres/admin).
+3. `mvn clean package` y desplegar el WAR en Tomcat 10+.
+
+## Arquitectura
+view (JSP) -> controller -> service -> dao (JDBC) -> PostgreSQL
+
+Patrones: Singleton (ConexionBD), Factory (DAOFactory, MetodoPagoFactory), Facade (PedidoFacade),
+Observer (PedidoSujeto/Notificador*), State (EstadoPedido*),
+Strategy (patterns/pago: MetodoPago con PagoTarjeta, PagoYape y PagoMercadoPago),
+Command (patterns/command: deshacer cambios de estado de reclamos),
+Memento (PedidoMemento, patterns/memento: revertir el avance de un pedido),
+Proxy (patterns/proxy: ProductoServiceProxy revisa el rol antes de crear/editar/eliminar productos y registra el intento),
+GRASP Controlador y Experto.
+Diagrama de clases: `docs/diagrama-clases.mmd` (pegar en https://mermaid.live).

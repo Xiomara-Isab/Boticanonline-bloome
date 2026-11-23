@@ -9,7 +9,7 @@
   List<Reclamo> reclamos = ConsultaService.reclamos();
   Map<Integer, String> nombres = new HashMap<>();
   Map<String, Integer> porRol = new LinkedHashMap<>();
-  for (String r : new String[]{"Cliente", "Vendedor", "Almacen", "Soporte", "Administrador"}) porRol.put(r, 0);
+  for (String r : com.botica.util.Constantes.ROLES) porRol.put(r, 0);
   for (Usuario u : usuarios) {
     nombres.put(u.getId(), u.getNombre());
     porRol.merge(u.getRol(), 1, Integer::sum);
@@ -103,6 +103,7 @@
               <option value="Almacen">Encargado de Almacén</option>
               <option value="Soporte">Soporte al Cliente</option>
               <option value="Administrador">Administrador</option>
+              <option value="Auditor">Auditor</option>
               <option value="Cliente">Cliente</option>
             </select>
           </div>

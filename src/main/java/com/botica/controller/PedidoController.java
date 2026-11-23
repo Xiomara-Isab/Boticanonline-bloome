@@ -5,7 +5,6 @@ import com.botica.model.Pedido;
 import com.botica.model.Usuario;
 import com.botica.patterns.facade.ItemCarrito;
 import com.botica.patterns.facade.PedidoFacade;
-import com.botica.util.Constantes;
 import com.botica.util.Html;
 import com.botica.util.ReglaNegocioException;
 import jakarta.servlet.ServletException;
@@ -17,7 +16,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
-/** GRASP Controlador: coordina compras, pagos, cancelaciones, avance y reversión de pedidos a través del Facade. */
+/** GRASP Controlador (el permiso por rol lo revisa RolFilter): coordina compras, pagos, cancelaciones, avance y reversión de pedidos a través del Facade. */
 @WebServlet({"/comprar", "/pagar", "/cancelarPedido", "/avanzarPedido", "/revertirPedido"})
 public class PedidoController extends HttpServlet {
     private final PedidoFacade pedidoFacade = new PedidoFacade();
@@ -40,11 +39,6 @@ public class PedidoController extends HttpServlet {
             return;
         }
         Usuario usuario = (Usuario) sesion.getAttribute("usuario");
-        if (!Constantes.ROL_CLIENTE.equals(usuario.getRol())) {
-            req.setAttribute("error", "Solo las cuentas de cliente pueden realizar compras");
-            req.getRequestDispatcher("catalogo.jsp").forward(req, resp);
-            return;
-        }
 
         try {
             int idProducto = Integer.parseInt(req.getParameter("idProducto"));
@@ -67,10 +61,6 @@ public class PedidoController extends HttpServlet {
         Usuario usuario = sesion == null ? null : (Usuario) sesion.getAttribute("usuario");
         if (usuario == null) {
             resp.sendRedirect(req.getContextPath() + "/login.jsp?sesion=1");
-            return;
-        }
-        if (!Constantes.ROL_CLIENTE.equals(usuario.getRol())) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 
@@ -101,10 +91,6 @@ public class PedidoController extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/login.jsp?sesion=1");
             return;
         }
-        if (!Constantes.ROL_CLIENTE.equals(usuario.getRol())) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
 
         try {
             int idPedido = Integer.parseInt(req.getParameter("idPedido"));
@@ -125,11 +111,6 @@ public class PedidoController extends HttpServlet {
         Usuario usuario = sesion == null ? null : (Usuario) sesion.getAttribute("usuario");
         if (usuario == null) {
             resp.sendRedirect(req.getContextPath() + "/login.jsp");
-            return;
-        }
-        String rol = usuario.getRol();
-        if (!Constantes.ROL_ALMACEN.equals(rol) && !Constantes.ROL_ADMINISTRADOR.equals(rol)) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 

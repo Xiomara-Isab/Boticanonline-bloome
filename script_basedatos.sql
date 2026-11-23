@@ -1,6 +1,9 @@
-
+-- Ejecutar completo con psql (o la "PSQL Tool" de pgAdmin), conectado a la base postgres:
+--   psql -U postgres -h localhost -f script_basedatos.sql
+-- En el Query Tool de pgAdmin \c no funciona: crear botica_db, abrir el Query Tool
+-- sobre botica_db y ejecutar desde CREATE TABLE usuario en adelante.
 CREATE DATABASE botica_db;
-
+\c botica_db
 
 CREATE TABLE usuario (
   id SERIAL PRIMARY KEY,
@@ -59,14 +62,27 @@ CREATE TABLE pago (
   fecha TIMESTAMP DEFAULT NOW()
 );
 
-
+-- Bitácora de auditoría. id_usuario es NULL en los logins fallidos (el correo intentado va en detalle).
+CREATE TABLE auditoria (
+  id SERIAL PRIMARY KEY,
+  id_usuario INT REFERENCES usuario(id),
+  rol VARCHAR(30),
+  accion VARCHAR(40) NOT NULL,
+  entidad VARCHAR(30),
+  id_entidad INT,
+  detalle TEXT,
+  ip VARCHAR(45),
+  fecha TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_auditoria_fecha ON auditoria (fecha);
 
 INSERT INTO usuario (nombre, correo, contrasena, rol) VALUES
   ('Ana Cliente', 'cliente@botica.com', 'fi+M78iwFem6cz5z+nb42w==:PPoVdos7KrePYGNicDtybbghz+4kq1t4OXZhQuOOyck=', 'Cliente'),
   ('Carlos Vendedor', 'vendedor@botica.com', 'm4ldbJHahzrDqzDgFJkM+w==:8/f9Ukgal3t1BtQ1d//kZOVz6K8ivI7WWd3vvaTTHf8=', 'Vendedor'),
   ('Luisa Almacén', 'almacen@botica.com', 'XTh2QlNrDDQqNDbqX2puqg==:4pEYjvSIJkfvYftYZ6kG0QN2cXJTZAPOnvJEk5fT28o=', 'Almacen'),
   ('Sofía Soporte', 'soporte@botica.com', 'oEgBTWtLUeW9M6z+beMnqQ==:02HinVABUyVQfLSR5153APvlH9rbHzxFSb+OAxWxXCE=', 'Soporte'),
-  ('Admin Botica', 'admin@botica.com', '9/Q4bsrCkZxlofNlzHhj1A==:DAaeBsyJ6Pm8QYH94Q+mexsS8N6VMY9Fq6D1HW26Yrw=', 'Administrador');
+  ('Admin Botica', 'admin@botica.com', '9/Q4bsrCkZxlofNlzHhj1A==:DAaeBsyJ6Pm8QYH94Q+mexsS8N6VMY9Fq6D1HW26Yrw=', 'Administrador'),
+  ('Raúl Auditor', 'auditor@botica.com', 'Fa33Eo9DWMqK3ZXr8KoHHA==:njL48nu+lRAbe6rNeYNi/ADkM458/wATpxXkgmKaZGg=', 'Auditor');
 
 INSERT INTO producto (nombre, descripcion, precio, stock, categoria, fecha_vencimiento, id_vendedor) VALUES
   ('Paracetamol 500 mg x 20', 'Alivio de dolor leve a moderado y fiebre.', 8.50, 120, 'Analgésicos', CURRENT_DATE + 540, (SELECT id FROM usuario WHERE correo='vendedor@botica.com')),

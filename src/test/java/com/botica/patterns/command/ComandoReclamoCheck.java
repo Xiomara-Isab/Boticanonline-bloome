@@ -8,6 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Comprobación sin base de datos del deshacer de reclamos. Ejecutar con:
+ * mvn -q test-compile dependency:build-classpath -Dmdep.outputFile=target/cp.txt &&
+ * java -ea -cp "target/classes:target/test-classes:$(cat target/cp.txt)" com.botica.patterns.command.ComandoReclamoCheck
+ */
 public class ComandoReclamoCheck {
     private static final Map<Integer, Reclamo> BD = new HashMap<>();
 

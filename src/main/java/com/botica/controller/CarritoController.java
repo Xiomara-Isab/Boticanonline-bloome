@@ -6,7 +6,6 @@ import com.botica.model.Producto;
 import com.botica.model.Usuario;
 import com.botica.patterns.facade.PedidoFacade;
 import com.botica.service.CarritoService;
-import com.botica.util.Constantes;
 import com.botica.util.ReglaNegocioException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -29,11 +28,6 @@ public class CarritoController extends HttpServlet {
         Usuario usuario = sesion == null ? null : (Usuario) sesion.getAttribute("usuario");
         if (usuario == null) {
             resp.sendRedirect(ctx + "/login.jsp?compra=1");
-            return;
-        }
-        if (!Constantes.ROL_CLIENTE.equals(usuario.getRol())) {
-            sesion.setAttribute("flashErr", "Solo las cuentas de cliente pueden usar el carrito");
-            resp.sendRedirect(ctx + "/panel");
             return;
         }
 
