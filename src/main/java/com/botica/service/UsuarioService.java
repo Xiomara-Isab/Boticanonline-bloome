@@ -56,22 +56,6 @@ public class UsuarioService {
         usuarioDAO.actualizarActivo(idDestino, activo);
     }
 
-    /** El administrador asigna una contraseña nueva al PERSONAL (no a clientes); se guarda siempre con hash. */
-    public void resetearContrasena(int idDestino, String nueva) {
-        if (nueva == null || nueva.length() < Constantes.LONGITUD_MINIMA_CONTRASENA) {
-            throw new ReglaNegocioException("La contraseña debe tener al menos "
-                    + Constantes.LONGITUD_MINIMA_CONTRASENA + " caracteres");
-        }
-        Usuario destino = usuarioDAO.buscarPorId(idDestino);
-        if (destino == null) {
-            throw new ReglaNegocioException("Usuario no encontrado");
-        }
-        if (Constantes.ROL_CLIENTE.equals(destino.getRol())) {
-            throw new ReglaNegocioException("La contraseña de un cliente no se restablece desde el panel: cada cliente administra la suya");
-        }
-        usuarioDAO.actualizarContrasena(idDestino, Seguridad.hashear(nueva));
-    }
-
     public void cambiarRol(int idActor, int idDestino, String nuevoRol) {
         Usuario destino = usuarioDAO.buscarPorId(idDestino);
         if (destino == null || !Constantes.ROLES.contains(nuevoRol)) {
