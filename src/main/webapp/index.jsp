@@ -1,23 +1,17 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="com.botica.model.Producto, com.botica.service.ConsultaService, com.botica.util.Html, java.util.*" %>
+<%@ page import="com.botica.model.Producto, com.botica.model.Categoria, com.botica.service.CategoriaService, com.botica.service.ConsultaService, com.botica.util.Html, java.util.*" %>
 <%
   String titulo = "Inicio";
   List<Producto> destacados = new ArrayList<>();
+  List<Categoria> categorias = new ArrayList<>();
   try {
     for (Producto p : ConsultaService.productos()) {
       if (p.isActivo() && p.getStock() > 0 && destacados.size() < 6) destacados.add(p);
     }
+    categorias = new CategoriaService().listarActivas();
   } catch (RuntimeException e) {
     // Si la base de datos no responde, la portada igual se muestra.
   }
-  String[][] categorias = {
-    {"Analgésicos", "bi-capsule", "#e76f51"},
-    {"Vitaminas", "bi-brightness-high", "#f4a261"},
-    {"Cuidado personal", "bi-droplet-half", "#2a9d8f"},
-    {"Primeros auxilios", "bi-bandaid", "#e63946"},
-    {"Bebés", "bi-balloon-heart", "#6c8ebf"},
-    {"Dermocosmética", "bi-stars", "#9b72cf"}
-  };
 %>
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
 
@@ -43,11 +37,11 @@
 <div class="container my-5">
   <h3 class="fw-bold mb-3">Compra por categoría</h3>
   <div class="row g-3">
-    <% for (String[] c : categorias) { %>
+    <% for (Categoria c : categorias) { %>
       <div class="col-6 col-md-4 col-lg-2">
-        <a class="cat-tile" href="catalogo.jsp?categoria=<%= java.net.URLEncoder.encode(c[0], "UTF-8") %>">
-          <i class="bi <%= c[1] %>" style="color: <%= c[2] %>;"></i>
-          <span class="fw-semibold small"><%= c[0] %></span>
+        <a class="cat-tile" href="catalogo.jsp?categoria=<%= java.net.URLEncoder.encode(c.getNombre(), "UTF-8") %>">
+          <i class="bi <%= Html.icono(c.getNombre()) %>" style="color: <%= Html.color(c.getNombre()) %>;"></i>
+          <span class="fw-semibold small"><%= Html.esc(c.getNombre()) %></span>
         </a>
       </div>
     <% } %>
