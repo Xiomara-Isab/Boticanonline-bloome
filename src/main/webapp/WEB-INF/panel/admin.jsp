@@ -77,14 +77,6 @@
                         <input type="hidden" name="activo" value="<%= !u.isActivo() %>">
                         <button class="btn btn-sm btn-outline-<%= u.isActivo() ? "danger" : "success" %>"><%= u.isActivo() ? "Desactivar" : "Activar" %></button>
                       </form>
-                      <% if (!"Cliente".equals(u.getRol())) { %>
-                      <form method="post" action="<%= ctx %>/panel" class="d-flex gap-1">
-                        <input type="hidden" name="accion" value="resetearContrasena">
-                        <input type="hidden" name="id" value="<%= u.getId() %>">
-                        <input name="contrasena" type="password" minlength="6" class="form-control form-control-sm" style="width:130px;" placeholder="Nueva contraseña" required>
-                        <button class="btn btn-sm btn-outline-warning" title="Restablecer contraseña"><i class="bi bi-key"></i></button>
-                      </form>
-                      <% } %>
                     </div>
                     <% } %>
                   </td></tr>

@@ -45,7 +45,7 @@ public class PanelController extends HttpServlet {
             Map.entry("cambiarActivoProducto", "PRODUCTO"), Map.entry("aplicarDescuento", "PRODUCTO"),
             Map.entry("registrarIngreso", "PRODUCTO"), Map.entry("retirarVencidos", "PRODUCTO"),
             Map.entry("cambiarRol", "USUARIO"), Map.entry("cambiarActivoUsuario", "USUARIO"),
-            Map.entry("resetearContrasena", "USUARIO"), Map.entry("crearUsuario", "USUARIO"));
+            Map.entry("crearUsuario", "USUARIO"));
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -164,11 +164,6 @@ public class PanelController extends HttpServlet {
                     boolean activo = Boolean.parseBoolean(req.getParameter("activo"));
                     usuarioService.cambiarActivo(u.getId(), Integer.parseInt(req.getParameter("id")), activo);
                     sesion.setAttribute("flashOk", activo ? "Usuario activado" : "Usuario desactivado");
-                }
-                case "resetearContrasena" -> {
-                    usuarioService.resetearContrasena(Integer.parseInt(req.getParameter("id")),
-                            req.getParameter("contrasena"));
-                    sesion.setAttribute("flashOk", "Contraseña restablecida");
                 }
                 case "crearUsuario" -> {
                     String rol = req.getParameter("rol");
