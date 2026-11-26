@@ -9,4 +9,6 @@ public interface UsuarioDAO {
     Usuario buscarPorId(int id);
     List<Usuario> listarTodos();
     void actualizarRol(int id, String rol);
+    void actualizarActivo(int id, boolean activo);
+    void actualizarContrasena(int id, String contrasenaHasheada);
 }

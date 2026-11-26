@@ -1,3 +1,4 @@
+<%@ page pageEncoding="UTF-8" %>
 <%
   String fOk = (String) session.getAttribute("flashOk");
   String fErr = (String) session.getAttribute("flashErr");

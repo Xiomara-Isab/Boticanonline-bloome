@@ -1,6 +1,42 @@
 <web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
-         version="5.0">
+         version="6.0">
   <display-name>BoticaOnline</display-name>
+  <!-- Los filtros (RolFilter, CsrfFilter) leen parámetros antes que los controladores: el cuerpo se decodifica como UTF-8 desde el inicio. -->
+  <request-character-encoding>UTF-8</request-character-encoding>
+  <!-- Los .jsp y los fragmentos .jspf (header/footer) se leen como UTF-8. Sin esto Tomcat lee los fragmentos
+       como ISO-8859-1 y las tildes salen como "CatÃ¡logo". -->
+  <jsp-config>
+    <jsp-property-group>
+      <url-pattern>*.jsp</url-pattern>
+      <url-pattern>*.jspf</url-pattern>
+      <page-encoding>UTF-8</page-encoding>
+    </jsp-property-group>
+  </jsp-config>
+  <!-- Sesión: 30 min de inactividad; la cookie no es legible desde JavaScript ni se envía desde otros sitios.
+       El atributo SameSite en cookie-config requiere Servlet 6.0 (Tomcat 10.1+). -->
+  <session-config>
+    <session-timeout>30</session-timeout>
+    <cookie-config>
+      <http-only>true</http-only>
+      <attribute>
+        <attribute-name>SameSite</attribute-name>
+        <attribute-value>Strict</attribute-value>
+      </attribute>
+    </cookie-config>
+    <tracking-mode>COOKIE</tracking-mode>
+  </session-config>
+  <error-page>
+    <error-code>403</error-code>
+    <location>/error.jsp</location>
+  </error-page>
+  <error-page>
+    <error-code>404</error-code>
+    <location>/error.jsp</location>
+  </error-page>
+  <error-page>
+    <error-code>500</error-code>
+    <location>/error.jsp</location>
+  </error-page>
   <welcome-file-list>
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>

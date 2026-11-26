@@ -38,7 +38,22 @@ public class UsuarioService {
         if (usuario == null || contrasena == null || !Seguridad.verificar(contrasena, usuario.getContrasena())) {
             throw new ReglaNegocioException("Correo o contraseña incorrectos");
         }
+        if (!usuario.isActivo()) {
+            throw new ReglaNegocioException("Tu cuenta está desactivada. Contacta al administrador");
+        }
         return usuario;
+    }
+
+    /** El administrador activa o desactiva cuentas (una cuenta desactivada no puede iniciar sesión). */
+    public void cambiarActivo(int idActor, int idDestino, boolean activo) {
+        Usuario destino = usuarioDAO.buscarPorId(idDestino);
+        if (destino == null) {
+            throw new ReglaNegocioException("Usuario no encontrado");
+        }
+        if (destino.getId() == idActor) {
+            throw new ReglaNegocioException("No puedes desactivar tu propia cuenta");
+        }
+        usuarioDAO.actualizarActivo(idDestino, activo);
     }
 
     public void cambiarRol(int idActor, int idDestino, String nuevoRol) {

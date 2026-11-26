@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="com.botica.model.*, com.botica.service.ConsultaService, com.botica.util.Html, java.util.*" %>
+<%@ page import="com.botica.model.*, com.botica.service.ConsultaService, com.botica.service.ReporteService, com.botica.util.Html, java.util.*" %>
 <%
   String titulo = "Panel de Administración";
   Usuario yo = (Usuario) session.getAttribute("usuario");
@@ -9,20 +9,25 @@
   List<Reclamo> reclamos = ConsultaService.reclamos();
   Map<Integer, String> nombres = new HashMap<>();
   Map<String, Integer> porRol = new LinkedHashMap<>();
-  for (String r : new String[]{"Cliente", "Vendedor", "Almacen", "Soporte", "Administrador"}) porRol.put(r, 0);
+  for (String r : com.botica.util.Constantes.ROLES) porRol.put(r, 0);
   for (Usuario u : usuarios) {
     nombres.put(u.getId(), u.getNombre());
     porRol.merge(u.getRol(), 1, Integer::sum);
   }
-  double ventas = 0;
-  for (Pedido p : pedidos) ventas += p.getTotal();
+  ReporteService.ResumenVentas ventasHoy = new ReporteService().ventasDelDia();
   int reclamosAbiertos = 0;
   for (Reclamo r : reclamos) if (!"RESUELTO".equals(r.getEstado())) reclamosAbiertos++;
 %>
 <%@ include file="/WEB-INF/jspf/header.jspf" %>
 
 <div class="panel-banda">
-  <div class="container"><h3 class="mb-0 fw-bold"><i class="bi bi-shield-check"></i> Panel de Administración</h3><span class="opacity-75">Hola, <%= Html.esc(yo.getNombre()) %> · visión general del negocio y gestión de usuarios</span></div>
+  <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <div><h3 class="mb-0 fw-bold"><i class="bi bi-shield-check"></i> Panel de Administración</h3><span class="opacity-75">Hola, <%= Html.esc(yo.getNombre()) %> · usuarios y roles, categorías, ventas y reportes</span></div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-light btn-sm" href="<%= ctx %>/admin/categorias"><i class="bi bi-tags"></i> Categorías</a>
+      <a class="btn btn-light btn-sm" href="<%= ctx %>/admin/reportes"><i class="bi bi-graph-up"></i> Reportes de ventas</a>
+    </div>
+  </div>
 </div>
 
 <div class="container my-4">
@@ -31,7 +36,7 @@
   <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3"><div class="kpi"><div class="icono"><i class="bi bi-people"></i></div><div><div class="valor"><%= usuarios.size() %></div><div class="etq">Usuarios registrados</div></div></div></div>
     <div class="col-6 col-lg-3"><div class="kpi"><div class="icono"><i class="bi bi-box-seam"></i></div><div><div class="valor"><%= productos.size() %></div><div class="etq">Productos</div></div></div></div>
-    <div class="col-6 col-lg-3"><div class="kpi"><div class="icono"><i class="bi bi-receipt"></i></div><div><div class="valor"><%= pedidos.size() %></div><div class="etq">Pedidos · <%= Html.money(ventas) %></div></div></div></div>
+    <div class="col-6 col-lg-3"><a class="text-reset text-decoration-none" href="<%= ctx %>/admin/reportes"><div class="kpi"><div class="icono"><i class="bi bi-cash-coin"></i></div><div><div class="valor"><%= Html.money(ventasHoy.total()) %></div><div class="etq">Ventas de hoy · <%= ventasHoy.pedidos() %> pedido(s)</div></div></div></a></div>
     <div class="col-6 col-lg-3"><div class="kpi"><div class="icono" style="background:#fff4d6;color:#b58105;"><i class="bi bi-headset"></i></div><div><div class="valor"><%= reclamosAbiertos %></div><div class="etq">Reclamos sin resolver</div></div></div></div>
   </div>
 
@@ -46,10 +51,11 @@
         </div>
         <div class="table-responsive" style="max-height: 320px; overflow-y: auto;">
           <table class="table table-sm table-hover">
-            <thead><tr><th>#</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Cambiar rol</th></tr></thead>
+            <thead><tr><th>#</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Cambiar rol</th><th>Acciones</th></tr></thead>
             <tbody>
               <% for (Usuario u : usuarios) { %>
                 <tr><td><%= u.getId() %></td><td><%= Html.esc(u.getNombre()) %></td><td><%= Html.esc(u.getCorreo()) %></td><td><span class="badge text-bg-secondary"><%= Html.esc(u.getRol()) %></span></td>
+                  <td><span class="badge text-bg-<%= u.isActivo() ? "success" : "secondary" %>"><%= u.isActivo() ? "Activo" : "Inactivo" %></span></td>
                   <td>
                     <% if (u.getId() != yo.getId()) { %>
                     <form method="post" action="<%= ctx %>/panel" class="d-flex gap-1">
@@ -61,6 +67,18 @@
                       <button class="btn btn-sm btn-outline-primary"><i class="bi bi-check2"></i></button>
                     </form>
                     <% } else { %><span class="text-muted small">(tú)</span><% } %>
+                  </td>
+                  <td>
+                    <% if (u.getId() != yo.getId()) { %>
+                    <div class="d-flex gap-1 flex-wrap">
+                      <form method="post" action="<%= ctx %>/panel">
+                        <input type="hidden" name="accion" value="cambiarActivoUsuario">
+                        <input type="hidden" name="id" value="<%= u.getId() %>">
+                        <input type="hidden" name="activo" value="<%= !u.isActivo() %>">
+                        <button class="btn btn-sm btn-outline-<%= u.isActivo() ? "danger" : "success" %>"><%= u.isActivo() ? "Desactivar" : "Activar" %></button>
+                      </form>
+                    </div>
+                    <% } %>
                   </td></tr>
               <% } %>
             </tbody>
@@ -82,6 +100,7 @@
               <option value="Almacen">Encargado de Almacén</option>
               <option value="Soporte">Soporte al Cliente</option>
               <option value="Administrador">Administrador</option>
+              <option value="Auditor">Auditor</option>
               <option value="Cliente">Cliente</option>
             </select>
           </div>

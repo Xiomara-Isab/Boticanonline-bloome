@@ -22,6 +22,7 @@ public class ComandoReclamoCheck {
         @Override public List<Reclamo> listarTodos() { return List.copyOf(BD.values()); }
         @Override public List<Reclamo> listarPorCliente(int idCliente) { return List.of(); }
         @Override public void actualizarEstado(int id, String estado) { BD.get(id).setEstado(estado); }
+        @Override public void responder(int id, String respuesta, int idSoporte) { }
     };
 
     public static void main(String[] args) {

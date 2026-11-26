@@ -3,7 +3,9 @@ package com.botica.service;
 import com.botica.dao.ProductoDAO;
 import com.botica.dao.factory.DAOFactory;
 import com.botica.model.Producto;
+import com.botica.util.Constantes;
 import com.botica.util.ReglaNegocioException;
+import java.time.LocalDate;
 
 /** Servicio real del catálogo: validación de datos y control de precios y stock. */
 public class ProductoServiceImpl implements ProductoService {
@@ -52,6 +54,45 @@ public class ProductoServiceImpl implements ProductoService {
         } catch (RuntimeException e) {
             throw new ReglaNegocioException("No se puede eliminar: el producto ya tiene pedidos asociados");
         }
+    }
+
+    @Override
+    public void cambiarActivo(int idProducto, boolean activo) {
+        obtener(idProducto);
+        productoDAO.actualizarActivo(idProducto, activo);
+    }
+
+    @Override
+    public void aplicarDescuento(int idProducto, int porcentaje) {
+        if (porcentaje < 0 || porcentaje > Constantes.DESCUENTO_MAXIMO) {
+            throw new ReglaNegocioException("El descuento debe estar entre 0 y " + Constantes.DESCUENTO_MAXIMO + " %");
+        }
+        obtener(idProducto);
+        productoDAO.actualizarDescuento(idProducto, porcentaje);
+    }
+
+    @Override
+    public void registrarIngreso(int idProducto, int cantidad) {
+        if (cantidad <= 0) {
+            throw new ReglaNegocioException("La cantidad que ingresa debe ser mayor que cero");
+        }
+        obtener(idProducto);
+        productoDAO.sumarStock(idProducto, cantidad);
+    }
+
+    @Override
+    public int retirarVencidos() {
+        int retirados = 0;
+        LocalDate hoy = LocalDate.now();
+        for (Producto producto : productoDAO.listarTodos()) {
+            if (producto.getFechaVencimiento() != null && producto.getFechaVencimiento().isBefore(hoy)
+                    && producto.getStock() > 0) {
+                producto.setStock(0);
+                productoDAO.actualizar(producto);
+                retirados++;
+            }
+        }
+        return retirados;
     }
 
     private Producto obtener(int idProducto) {

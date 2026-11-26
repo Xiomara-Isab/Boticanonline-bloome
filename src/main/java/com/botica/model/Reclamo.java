@@ -8,6 +8,8 @@ public class Reclamo {
     private String descripcion;
     private String estado;
     private LocalDateTime fechaCreacion;
+    private String respuesta;
+    private int idSoporte;
 
     public Reclamo() {
     }
@@ -16,6 +18,23 @@ public class Reclamo {
         this.idPedido = idPedido;
         this.descripcion = descripcion;
         this.estado = estado;
+    }
+
+    public String getRespuesta() {
+        return respuesta;
+    }
+
+    public void setRespuesta(String respuesta) {
+        this.respuesta = respuesta;
+    }
+
+    /** Id del usuario de Soporte que atiende el reclamo (0 si nadie lo tomó). */
+    public int getIdSoporte() {
+        return idSoporte;
+    }
+
+    public void setIdSoporte(int idSoporte) {
+        this.idSoporte = idSoporte;
     }
 
     public int getId() {

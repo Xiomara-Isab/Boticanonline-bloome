@@ -26,6 +26,7 @@ public class PedidoSujeto {
         PedidoSujeto s = new PedidoSujeto();
         s.agregarObservador(new NotificadorCliente());
         s.agregarObservador(new NotificadorAlmacen());
+        s.agregarObservador(new NotificadorAuditoria());
         return s;
     }
 }

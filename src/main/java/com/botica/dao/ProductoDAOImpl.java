@@ -116,6 +116,47 @@ public class ProductoDAOImpl implements ProductoDAO {
         }
     }
 
+    @Override
+    public void sumarStock(int idProducto, int cantidad) {
+        sumarStock(idProducto, cantidad, ConexionBD.getInstancia().getConexion());
+    }
+
+    @Override
+    public void sumarStock(int idProducto, int cantidad, Connection conn) {
+        String sql = "UPDATE producto SET stock = stock + ? WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, cantidad);
+            ps.setInt(2, idProducto);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al sumar stock", e);
+        }
+    }
+
+    @Override
+    public void actualizarActivo(int idProducto, boolean activo) {
+        String sql = "UPDATE producto SET activo = ? WHERE id = ?";
+        try (PreparedStatement ps = ConexionBD.getInstancia().getConexion().prepareStatement(sql)) {
+            ps.setBoolean(1, activo);
+            ps.setInt(2, idProducto);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al cambiar el estado del producto", e);
+        }
+    }
+
+    @Override
+    public void actualizarDescuento(int idProducto, int descuento) {
+        String sql = "UPDATE producto SET descuento = ? WHERE id = ?";
+        try (PreparedStatement ps = ConexionBD.getInstancia().getConexion().prepareStatement(sql)) {
+            ps.setInt(1, descuento);
+            ps.setInt(2, idProducto);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al aplicar el descuento", e);
+        }
+    }
+
     private Producto mapear(ResultSet rs) throws SQLException {
         Producto p = new Producto();
         p.setId(rs.getInt("id"));
@@ -127,6 +168,8 @@ public class ProductoDAOImpl implements ProductoDAO {
         Date fecha = rs.getDate("fecha_vencimiento");
         if (fecha != null) p.setFechaVencimiento(fecha.toLocalDate());
         p.setIdVendedor(rs.getInt("id_vendedor"));
+        p.setActivo(rs.getBoolean("activo"));
+        p.setDescuento(rs.getInt("descuento"));
         return p;
     }
 }

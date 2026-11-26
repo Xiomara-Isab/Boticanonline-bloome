@@ -1,12 +1,15 @@
 package com.botica.service;
 
 import com.botica.dao.factory.DAOFactory;
+import com.botica.model.Auditoria;
 import com.botica.model.DetallePedido;
+import com.botica.model.Pago;
 import com.botica.model.Pedido;
 import com.botica.model.Producto;
 import com.botica.model.Reclamo;
 import com.botica.model.Usuario;
 import com.botica.patterns.memento.HistorialPedidos;
+import java.time.LocalDate;
 import java.util.List;
 
 /** Consultas de solo lectura para las vistas: así los JSP ya no tocan la capa DAO directamente. */
@@ -43,6 +46,10 @@ public final class ConsultaService {
         return DAOFactory.getDetallePedidoDAO().listarPorPedido(idPedido);
     }
 
+    public static List<Pago> pagosDePedido(int idPedido) {
+        return DAOFactory.getPagoDAO().listarPorPedido(idPedido);
+    }
+
     public static List<Reclamo> reclamos() {
         return DAOFactory.getReclamoDAO().listarTodos();
     }
@@ -53,5 +60,9 @@ public final class ConsultaService {
 
     public static List<Usuario> usuarios() {
         return DAOFactory.getUsuarioDAO().listarTodos();
+    }
+
+    public static List<Auditoria> auditoria(LocalDate desde, LocalDate hasta, String usuario, String accion, int limite) {
+        return new AuditoriaService().listar(desde, hasta, usuario, accion, limite);
     }
 }

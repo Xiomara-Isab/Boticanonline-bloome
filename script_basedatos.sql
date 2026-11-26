@@ -10,7 +10,8 @@ CREATE TABLE usuario (
   nombre VARCHAR(100) NOT NULL,
   correo VARCHAR(100) UNIQUE NOT NULL,
   contrasena VARCHAR(255) NOT NULL,
-  rol VARCHAR(30) NOT NULL
+  rol VARCHAR(30) NOT NULL,
+  activo BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 CREATE TABLE producto (
@@ -21,7 +22,9 @@ CREATE TABLE producto (
   stock INT NOT NULL DEFAULT 0,
   categoria VARCHAR(50),
   fecha_vencimiento DATE,
-  id_vendedor INT REFERENCES usuario(id)
+  id_vendedor INT REFERENCES usuario(id),
+  activo BOOLEAN NOT NULL DEFAULT TRUE,
+  descuento INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE pedido (
@@ -45,17 +48,41 @@ CREATE TABLE reclamo (
   id_pedido INT REFERENCES pedido(id),
   descripcion TEXT,
   estado VARCHAR(30) DEFAULT 'ABIERTO',
-  fecha_creacion TIMESTAMP DEFAULT NOW()
+  fecha_creacion TIMESTAMP DEFAULT NOW(),
+  respuesta TEXT,
+  id_soporte INT REFERENCES usuario(id)
 );
 
+CREATE TABLE pago (
+  id SERIAL PRIMARY KEY,
+  id_pedido INT REFERENCES pedido(id),
+  metodo VARCHAR(30) NOT NULL,
+  monto NUMERIC(10,2) NOT NULL,
+  referencia VARCHAR(40),
+  fecha TIMESTAMP DEFAULT NOW()
+);
 
+-- Bitácora de auditoría. id_usuario es NULL en los logins fallidos (el correo intentado va en detalle).
+CREATE TABLE auditoria (
+  id SERIAL PRIMARY KEY,
+  id_usuario INT REFERENCES usuario(id),
+  rol VARCHAR(30),
+  accion VARCHAR(40) NOT NULL,
+  entidad VARCHAR(30),
+  id_entidad INT,
+  detalle TEXT,
+  ip VARCHAR(45),
+  fecha TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_auditoria_fecha ON auditoria (fecha);
 
 INSERT INTO usuario (nombre, correo, contrasena, rol) VALUES
   ('Ana Cliente', 'cliente@botica.com', 'fi+M78iwFem6cz5z+nb42w==:PPoVdos7KrePYGNicDtybbghz+4kq1t4OXZhQuOOyck=', 'Cliente'),
   ('Carlos Vendedor', 'vendedor@botica.com', 'm4ldbJHahzrDqzDgFJkM+w==:8/f9Ukgal3t1BtQ1d//kZOVz6K8ivI7WWd3vvaTTHf8=', 'Vendedor'),
   ('Luisa Almacén', 'almacen@botica.com', 'XTh2QlNrDDQqNDbqX2puqg==:4pEYjvSIJkfvYftYZ6kG0QN2cXJTZAPOnvJEk5fT28o=', 'Almacen'),
   ('Sofía Soporte', 'soporte@botica.com', 'oEgBTWtLUeW9M6z+beMnqQ==:02HinVABUyVQfLSR5153APvlH9rbHzxFSb+OAxWxXCE=', 'Soporte'),
-  ('Admin Botica', 'admin@botica.com', '9/Q4bsrCkZxlofNlzHhj1A==:DAaeBsyJ6Pm8QYH94Q+mexsS8N6VMY9Fq6D1HW26Yrw=', 'Administrador');
+  ('Admin Botica', 'admin@botica.com', '9/Q4bsrCkZxlofNlzHhj1A==:DAaeBsyJ6Pm8QYH94Q+mexsS8N6VMY9Fq6D1HW26Yrw=', 'Administrador'),
+  ('Raúl Auditor', 'auditor@botica.com', 'Fa33Eo9DWMqK3ZXr8KoHHA==:njL48nu+lRAbe6rNeYNi/ADkM458/wATpxXkgmKaZGg=', 'Auditor');
 
 INSERT INTO producto (nombre, descripcion, precio, stock, categoria, fecha_vencimiento, id_vendedor) VALUES
   ('Paracetamol 500 mg x 20', 'Alivio de dolor leve a moderado y fiebre.', 8.50, 120, 'Analgésicos', CURRENT_DATE + 540, (SELECT id FROM usuario WHERE correo='vendedor@botica.com')),
@@ -71,7 +98,7 @@ INSERT INTO producto (nombre, descripcion, precio, stock, categoria, fecha_venci
   ('Pañales etapa 3 x 40', 'Máxima absorción para bebés de 6 a 10 kg.', 52.90, 30, 'Bebés', NULL, (SELECT id FROM usuario WHERE correo='vendedor@botica.com')),
   ('Crema para coceduras 100 g', 'Protege la piel sensible del bebé.', 14.20, 0, 'Bebés', CURRENT_DATE + 365, (SELECT id FROM usuario WHERE correo='vendedor@botica.com'));
 
--- Pedidos de ejemplo del cliente demo
+-- Pedidos de ejemplo 
 INSERT INTO pedido (id_cliente, fecha_pedido, estado, total) VALUES
   ((SELECT id FROM usuario WHERE correo='cliente@botica.com'), NOW() - INTERVAL '6 days', 'ENTREGADO', 33.40),
   ((SELECT id FROM usuario WHERE correo='cliente@botica.com'), NOW() - INTERVAL '3 days', 'ENVIADO', 48.00),
@@ -90,3 +117,9 @@ INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, subtotal) VALUES
 INSERT INTO reclamo (id_pedido, descripcion, estado) VALUES
   ((SELECT MIN(id) + 1 FROM pedido), 'Mi pedido sigue en camino y aún no llega, ¿pueden confirmar la fecha de entrega?', 'ABIERTO'),
   ((SELECT MIN(id) FROM pedido), 'Una de las cajas llegó con el empaque golpeado.', 'RESUELTO');
+
+-- Pagos de los pedidos de ejemplo 
+INSERT INTO pago (id_pedido, metodo, monto, referencia) VALUES
+  ((SELECT MIN(id) FROM pedido), 'TARJETA', 33.40, 'TJ-10000001'),
+  ((SELECT MIN(id) + 1 FROM pedido), 'YAPE', 48.00, 'YP-10000002'),
+  ((SELECT MIN(id) + 2 FROM pedido), 'MERCADO_PAGO', 45.00, 'MP-10000003');
