@@ -1,21 +1,21 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="com.botica.model.Usuario, com.botica.model.Producto, com.botica.service.ConsultaService, com.botica.util.Html, java.util.*" %>
+<%@ page import="com.botica.model.Usuario, com.botica.model.Producto, com.botica.model.Categoria, com.botica.service.CategoriaService, com.botica.service.ConsultaService, com.botica.util.Html, java.util.*" %>
 <%
   String titulo = "Catálogo";
   String q = request.getParameter("q");
   String cat = request.getParameter("categoria");
   List<Producto> todos = new ArrayList<>();
+  List<String> categorias = new ArrayList<>();
   String errorBD = null;
   try {
     todos = ConsultaService.productos();
+    for (Categoria c : new CategoriaService().listarActivas()) categorias.add(c.getNombre());
   } catch (RuntimeException e) {
     errorBD = "No se pudo cargar el catálogo en este momento.";
   }
-  TreeSet<String> categorias = new TreeSet<>();
   List<Producto> productos = new ArrayList<>();
   for (Producto p : todos) {
     if (!p.isActivo()) continue; // los productos desactivados por el vendedor no se muestran
-    if (p.getCategoria() != null && !p.getCategoria().isBlank()) categorias.add(p.getCategoria());
     boolean okCat = cat == null || cat.isBlank() || cat.equals(p.getCategoria());
     String texto = (p.getNombre() + " " + (p.getDescripcion() == null ? "" : p.getDescripcion())).toLowerCase();
     boolean okQ = q == null || q.isBlank() || texto.contains(q.toLowerCase());

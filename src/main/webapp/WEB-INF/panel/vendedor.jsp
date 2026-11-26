@@ -56,9 +56,10 @@
             <div class="col-6"><input name="stock" type="number" min="0" class="form-control" placeholder="Stock" required></div>
           </div>
           <div class="mb-2">
-            <select name="categoria" class="form-select">
-              <option>Analgésicos</option><option>Vitaminas</option><option>Cuidado personal</option>
-              <option>Primeros auxilios</option><option>Bebés</option><option>Dermocosmética</option>
+            <select name="categoria" class="form-select" required>
+              <% List<Categoria> categorias = new com.botica.service.CategoriaService().listarActivas(); %>
+              <% if (categorias.isEmpty()) { %><option value="">No hay categorías activas: pídelas al Administrador</option><% } %>
+              <% for (Categoria c : categorias) { %><option value="<%= Html.esc(c.getNombre()) %>"><%= Html.esc(c.getNombre()) %></option><% } %>
             </select>
           </div>
           <div class="mb-3"><label class="form-label small text-muted mb-0">Fecha de vencimiento (opcional)</label><input name="fechaVencimiento" type="date" class="form-control"></div>
